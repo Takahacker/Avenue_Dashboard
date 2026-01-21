@@ -4,60 +4,67 @@ import requests
 from datetime import datetime, timedelta
 import pandas as pd
 from typing import List, Dict
+import sys
 
-LOOKER_BASE_URL = "https://avenueanalytics.cloud.looker.com:19999"
-ENDPOINT = "/api/4.0/queries/run/json"
+# Adicionar diretório pai ao path para importar utils
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-ACCESS_TOKEN = os.getenv("LOOKER_ACCESS_TOKEN")
-if not ACCESS_TOKEN:
-    raise RuntimeError("LOOKER_ACCESS_TOKEN não definido")
+from utils import (
+    carregar_clientes_prunus,
+    carregar_mapeamento_banker,
+    gerar_datas_diarias,
+    salvar_banco_dados,
+    pivotar_dados,
+)
+
+LOOKER_BASE_URL = "https://avenueanalytics.cloud.looker.com"
+LOGIN_ENDPOINT = "/api/4.0/login"
+QUERY_ENDPOINT = "/api/4.0/queries/run/json"
+
+CLIENT_ID = os.getenv("LOOKER_CLIENT_ID")
+CLIENT_SECRET = os.getenv("LOOKER_CLIENT_SECRET")
+
+if not CLIENT_ID or not CLIENT_SECRET:
+    raise RuntimeError("LOOKER_CLIENT_ID e LOOKER_CLIENT_SECRET não definidos")
+
+# Token de acesso será obtido dinamicamente
+ACCESS_TOKEN = None
 
 
-def carregar_clientes_prunus(arquivo: str = "prunus_list.txt") -> List[str]:
+def autenticar_looker() -> str:
     """
-    Carrega lista de clientes do arquivo prunus_list.txt.
-
-    Args:
-        arquivo: Caminho do arquivo com a lista de clientes
-
+    Autentica com a API Looker usando OAuth2 (client_id e client_secret).
+    
     Returns:
-        Lista com nomes dos clientes (em minúsculas para comparação)
+        Token de acesso para usar nas requisições
     """
-    clientes = []
+    global ACCESS_TOKEN
+    
+    payload = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+    }
+    
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    
     try:
-        with open(arquivo, "r", encoding="utf-8") as f:
-            for linha in f:
-                cliente = linha.strip()
-                if cliente:  # Ignora linhas vazias
-                    clientes.append(cliente.lower())
-        print(f"✓ Carregados {len(clientes)} clientes de {arquivo}")
-        return clientes
-    except FileNotFoundError:
-        print(f"⚠ Arquivo {arquivo} não encontrado!")
-        return []
-
-
-def gerar_datas_semanais(data_inicio: str = "2025-04-23") -> List[str]:
-    """
-    Gera lista de datas de 7 em 7 dias a partir de data_inicio até hoje.
-
-    Args:
-        data_inicio: Data inicial no formato YYYY-MM-DD
-
-    Returns:
-        Lista de datas em formato YYYY-MM-DD
-    """
-    inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
-    hoje = datetime.now()
-
-    datas = []
-    data_atual = inicio
-
-    while data_atual <= hoje:
-        datas.append(data_atual.strftime("%Y-%m-%d"))
-        data_atual += timedelta(days=7)
-
-    return datas
+        resp = requests.post(
+            f"{LOOKER_BASE_URL}{LOGIN_ENDPOINT}",
+            data=payload,
+            headers=headers,
+            timeout=30
+        )
+        resp.raise_for_status()
+        token = resp.json().get("access_token")
+        if not token:
+            raise RuntimeError("Token de acesso não retornado pela API Looker")
+        ACCESS_TOKEN = token
+        print(f"✓ Autenticação bem-sucedida. Token válido.")
+        return token
+    except Exception as e:
+        raise RuntimeError(f"Erro ao autenticar com Looker: {e}")
 
 
 def fetch_dados_looker(data: str) -> List[Dict]:
@@ -84,14 +91,14 @@ def fetch_dados_looker(data: str) -> List[Dict]:
     }
 
     headers = {
-        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Authorization": f"token {ACCESS_TOKEN}",
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
 
     try:
         resp = requests.post(
-            f"{LOOKER_BASE_URL}{ENDPOINT}", headers=headers, json=payload, timeout=60
+            f"{LOOKER_BASE_URL}{QUERY_ENDPOINT}", headers=headers, json=payload, timeout=60
         )
         resp.raise_for_status()
         return resp.json()
@@ -100,13 +107,14 @@ def fetch_dados_looker(data: str) -> List[Dict]:
         return []
 
 
-def processar_dados(datas: List[str], clientes_prunus: List[str]) -> pd.DataFrame:
+def processar_dados(datas: List[str], clientes_prunus: List[str], mapeamento_banker: Dict[str, str]) -> pd.DataFrame:
     """
-    Processa dados semanais e cria DataFrame pivotado com soma de auc_usd por cliente por semana.
+    Processa dados diários e cria DataFrame pivotado com soma de auc_usd por cliente por dia.
 
     Args:
         datas: Lista de datas a processar
         clientes_prunus: Lista de clientes da Prunus para filtrar
+        mapeamento_banker: Dicionário cliente -> banker
 
     Returns:
         DataFrame com clientes nas linhas e datas nas colunas
@@ -114,7 +122,7 @@ def processar_dados(datas: List[str], clientes_prunus: List[str]) -> pd.DataFram
     resultados = []
 
     for i, data in enumerate(datas, 1):
-        print(f"Processando semana {i}/{len(datas)} - Data: {data}")
+        print(f"Processando dia {i}/{len(datas)} - Data: {data}")
 
         dados = fetch_dados_looker(data)
 
@@ -147,10 +155,12 @@ def processar_dados(datas: List[str], clientes_prunus: List[str]) -> pd.DataFram
 
         # Adicionar resultados
         for (nome_cliente, cpf_cliente), soma_usd in clientes.items():
+            banker = mapeamento_banker.get(nome_cliente.lower(), "Desconhecido")
             resultados.append(
                 {
                     "Cliente": nome_cliente,
                     "CPF": cpf_cliente,
+                    "Banker": banker,
                     "Data": data,
                     "Soma_USD": soma_usd if soma_usd > 0 else None,
                 }
@@ -158,22 +168,13 @@ def processar_dados(datas: List[str], clientes_prunus: List[str]) -> pd.DataFram
 
         print(f"  {len(clientes)} clientes Prunus processados")
 
-    # Criar DataFrame
-    df = pd.DataFrame(resultados)
-
-    if df.empty:
-        return df
-
-    # Pivotar: Cliente x Data
-    df_pivot = df.pivot_table(
-        index=["Cliente", "CPF"], columns="Data", values="Soma_USD", aggfunc="first"
-    ).reset_index()
-
-    # Reordenar colunas de data
-    colunas_data = sorted(
-        [col for col in df_pivot.columns if col not in ["Cliente", "CPF"]]
+    # Usar função de pivot genérica do utils
+    df_pivot = pivotar_dados(
+        resultados,
+        indice=["Cliente", "CPF", "Banker"],
+        colunas="Data",
+        valores="Soma_USD"
     )
-    df_pivot = df_pivot[["Cliente", "CPF"] + colunas_data]
 
     return df_pivot
 
@@ -185,69 +186,63 @@ def salvar_banco_dados(df: pd.DataFrame):
     Args:
         df: DataFrame a ser salvo
     """
-    os.makedirs("data", exist_ok=True)
-
-    # Salvar como CSV
-    csv_path = "data/evolucao_pl_semanal.csv"
-    df.to_csv(csv_path, index=False, encoding="utf-8")
-    print(f"\n✓ Dados salvos em: {csv_path}")
-
-    # Salvar como JSON
-    json_path = "data/evolucao_pl_semanal.json"
-    df_json = df.reset_index() if df.index.name else df.copy()
-    df_json.to_json(json_path, orient="records", indent=2, force_ascii=False)
-    print(f"✓ Dados salvos em: {json_path}")
-
-    # Salvar como Excel (se openpyxl estiver disponível)
-    try:
-        excel_path = "data/evolucao_pl_semanal.xlsx"
-        df.to_excel(excel_path, sheet_name="Evolução PL")
-        print(f"✓ Dados salvos em: {excel_path}")
-    except ImportError:
-        print("(openpyxl não instalado, pulando Excel)")
+    from utils import salvar_banco_dados as save_data
+    save_data(df, prefixo="evolucao_pl_diaria")
 
 
 def main():
     """Função principal"""
     print("=" * 60)
-    print("EVOLUÇÃO DE P&L SEMANAL - AVENUE (CLIENTES PRUNUS)")
+    print("EVOLUÇÃO DE P&L DIÁRIA - AVENUE (CLIENTES PRUNUS)")
     print("=" * 60)
 
+    # Autenticar com Looker
+    print("\n1. Autenticando com API Looker...")
+    try:
+        token = autenticar_looker()
+    except Exception as e:
+        print(f"✗ Falha na autenticação: {e}")
+        return
+
     # Carregar clientes Prunus
-    print("\n1. Carregando lista de clientes Prunus...")
+    print("\n2. Carregando lista de clientes Prunus...")
     clientes_prunus = carregar_clientes_prunus("prunus_list.txt")
 
     if not clientes_prunus:
         print("⚠ Nenhum cliente Prunus carregado!")
         return
 
-    # Gerar datas semanais
-    print("\n2. Gerando datas semanais de 23/04/2025 até hoje...")
-    datas = gerar_datas_semanais("2025-04-23")
-    print(f"   Total de semanas: {len(datas)}")
+    # Carregar mapeamento Banker
+    print("\n3. Carregando mapeamento de Bankers...")
+    mapeamento_banker = carregar_mapeamento_banker("banker_list.txt")
+
+    # Gerar datas diárias
+    print("\n4. Gerando datas diárias de 01/12/2025 até hoje...")
+    datas = gerar_datas_diarias("2025-12-01")
+    print(f"   Total de dias: {len(datas)}")
     print(f"   Período: {datas[0]} a {datas[-1]}")
 
     # Processar dados
-    print("\n3. Puxando dados do Looker (excluindo Balance US Banking)...")
-    df = processar_dados(datas, clientes_prunus)
+    print("\n5. Puxando dados do Looker (excluindo Balance US Banking)...")
+    df = processar_dados(datas, clientes_prunus, mapeamento_banker)
 
     if df.empty:
         print("\n⚠ Nenhum dado foi retornado!")
         return
 
     # Exibir resumo
-    print("\n4. Resumo dos dados:")
+    print("\n6. Resumo dos dados:")
     print(f"   Total de clientes: {len(df)}")
     print(
-        f"   Total de semanas: {len([col for col in df.columns if col not in ['Cliente', 'CPF']])}"
+        f"   Total de dias: {len([col for col in df.columns if col not in ['Cliente', 'CPF', 'Banker']])}"
     )
 
     # Salvar banco de dados
-    print("\n5. Salvando banco de dados...")
+    print("\n7. Salvando banco de dados...")
     salvar_banco_dados(df)
 
     # Exibir amostra
-    print("\n6. Primeiras linhas dos dados:")
+    print("\n8. Primeiras linhas dos dados:")
     print(df.head(10).to_string(index=False))
 
     print("\n" + "=" * 60)
