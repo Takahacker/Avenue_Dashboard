@@ -1,0 +1,12 @@
+Cliente, Perfil
+Adilson Ferreira da Silva Junior,Low‑Risk Portfolio
+Andre luis costa, Balanced‑Risk Portfolio
+BRUNA PAIVA SBOARINI,Low‑Risk Portfolio
+EDUARDO SBOARINI,Low‑Risk Portfolio
+Ettore Vasconcellos Paiola,Aggressive‑Risk Portfolio
+MARIA ALICE AMADO GOUVEIA VENTURINI,Bonds
+Mara Silvia Porto Vilela,Low‑Risk Portfolio
+SILVIO LUIZ VENTURINI,Low‑Risk Portfolio
+Wanderley Crestoni Fernandes,Conservador PF
+Jones Antonio Pagno, Low‑Risk Portfolio
+Agel Gustavo Turim, Balanced‑Risk Portfolio

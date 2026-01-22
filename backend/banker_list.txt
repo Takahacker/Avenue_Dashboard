@@ -1,11 +1,12 @@
 Cliente, Banker
-Adilson Ferreira da Silva Junior,Francisco Luiz
-Andre luis costa, Bruno Leite
-BRUNA PAIVA SBOARINI,Felipe Criscuolo
-EDUARDO SBOARINI,Felipe Criscuolo
-Ettore Vasconcellos Paiola,Tiago Paiola
-MARIA ALICE AMADO GOUVEIA VENTURINI,Eduardo Santo
+Adilson Ferreira da Silva Junior,Francisco Luiz Hintze Maranho
+Andre luis costa, Bruno Leite Bernardes
+BRUNA PAIVA SBOARINI,Felipe De Oliveira Criscuolo
+EDUARDO SBOARINI,Felipe De Oliveira Criscuolo
+Ettore Vasconcellos Paiola,	Tiago Paiola Mantovani
+MARIA ALICE AMADO GOUVEIA VENTURINI,Eduardo Santo Corsatto Vieira
 Mara Silvia Porto Vilela,Daniela Machado
-SILVIO LUIZ VENTURINI,Eduardo Santo
+SILVIO LUIZ VENTURINI,Eduardo Santo Corsatto Vieira
 Wanderley Crestoni Fernandes,André Guilherme
 Jones Antonio Pagno,Alan Finazzi Sbeghen
+Agel Gustavo Turim,Eduardo Marquesi de Oliveira

@@ -1,0 +1,12 @@
+Cliente, Banker, Email, Perfil
+Adilson Ferreira da Silva Junior,Francisco Luiz Hintze Maranho, adilson.light@gmail.com, Low‑Risk Portfolio
+Andre luis costa, Bruno Leite Bernardes, andreluiscosta.96@gmail.com, Balanced‑Risk Portfolio
+BRUNA PAIVA SBOARINI,Felipe De Oliveira Criscuolo, vendasara1@gmail.com, Low‑Risk Portfolio
+EDUARDO SBOARINI,Felipe De Oliveira Criscuolo, araimportsadm@gmail.com, Low‑Risk Portfolio
+Ettore Vasconcellos Paiola,	Tiago Paiola Mantovani, ettorevp@gmail.com, Aggressive‑Risk Portfolio
+MARIA ALICE AMADO GOUVEIA VENTURINI,Eduardo Santo Corsatto Vieira, JOSE.OTAVIO@TERRACONTTEMPORANEA.COM.BR, Bonds
+Mara Silvia Porto Vilela,Daniela Machado, VILELAMARA4@GMAIL.COM, Low‑Risk Portfolio
+SILVIO LUIZ VENTURINI,Eduardo Santo Corsatto Vieira, silvio@terraconttemporanea.com.br, Low‑Risk Portfolio
+Wanderley Crestoni Fernandes,André Guilherme, wancrestoni@gmail.com, Conservador PF
+Jones Antonio Pagno,Alan Finazzi Sbeghen, jonespagno@gmail.com, Low‑Risk Portfolio
+Agel Gustavo Turim,Eduardo Marquesi de Oliveira, agelgustavo@gmail.com, Balanced‑Risk Portfolio

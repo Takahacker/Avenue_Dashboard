@@ -52,7 +52,7 @@ def autenticar_looker() -> str:
             f"{LOOKER_BASE_URL}{LOGIN_ENDPOINT}",
             data=payload,
             headers=headers,
-            timeout=30
+            timeout=53
         )
         resp.raise_for_status()
         token = resp.json().get("access_token")
@@ -65,12 +65,12 @@ def autenticar_looker() -> str:
         raise RuntimeError(f"Erro ao autenticar com Looker: {e}")
 
 
-def fetch_net_inflow_looker(filtro: str = "last 120 days") -> List[Dict]:
+def fetch_net_inflow_looker(filtro: str = "last 53 days") -> List[Dict]:
     """
     Faz requisição ao Looker para net_inflow.
 
     Args:
-        filtro: Filtro de data (padrão: últimos 120 dias)
+        filtro: Filtro de data (padrão: últimos 53 dias)
 
     Returns:
         Lista de registros retornados pela API
@@ -305,8 +305,8 @@ def main():
     mapeamento_banker = carregar_mapeamento_banker("banker_list.txt")
 
     # Buscar dados de net_inflow
-    print("\n4. Puxando dados de Net Inflow dos últimos 120 dias...")
-    dados = fetch_net_inflow_looker("last 120 days")
+    print("\n4. Puxando dados de Net Inflow dos últimos 53 dias...")
+    dados = fetch_net_inflow_looker("last 53 days")
 
     if not dados:
         print("⚠ Nenhum dado de net_inflow foi retornado!")
