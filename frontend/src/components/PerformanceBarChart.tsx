@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 import { 
   BarChart, 
   Bar, 
@@ -21,7 +22,7 @@ const data = [
   { month: 'Jan', income: 55000, expense: 25000 },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
   if (active && payload && payload.length) {
     return (
       <motion.div
@@ -29,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         animate={{ opacity: 1, scale: 1 }}
         className="glass-card-gold p-4"
       >
-        <p className="text-xs text-muted-foreground mb-2">{label}</p>
+        <p className={`text-xs mb-2 ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>{label}</p>
         <div className="space-y-1">
           <p className="text-sm">
             <span className="text-prunus-gold">●</span> Entrada: ${payload[0]?.value.toLocaleString()}
@@ -45,6 +46,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const PerformanceBarChart = () => {
+  const { isDarkMode } = useTheme();
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   return (
@@ -56,17 +58,17 @@ const PerformanceBarChart = () => {
     >
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-serif text-gold-gradient">Fluxo de Capital</h3>
-          <p className="text-sm text-muted-foreground">Entradas e saídas mensais</p>
+          <h3 className="text-lg font-serif text-gold-gradient">Captação no Período</h3>
+          <p className={`text-sm ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>Entradas e saídas mensais</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-prunus-gold" />
-            <span className="text-xs text-muted-foreground">Entrada</span>
+            <span className={`text-xs ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>Entrada</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-prunus-green-light" />
-            <span className="text-xs text-muted-foreground">Saída</span>
+            <span className={`text-xs ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>Saída</span>
           </div>
         </div>
       </div>
@@ -83,18 +85,24 @@ const PerformanceBarChart = () => {
             }}
             onMouseLeave={() => setHoveredBar(null)}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(160, 30%, 25%)" />
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={isDarkMode ? "hsl(160, 30%, 25%)" : "hsl(160, 30%, 85%)"} 
+            />
             <XAxis 
               dataKey="month" 
-              stroke="hsl(0, 0%, 50%)"
-              tick={{ fontSize: 11 }}
+              stroke={isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)"}
+              tick={{ fontSize: 11, fill: isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)" }}
             />
             <YAxis 
-              stroke="hsl(0, 0%, 50%)"
+              stroke={isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)"}
               tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 11, fill: isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)" }}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(160, 30%, 20%)' }} />
+            <Tooltip 
+              content={<CustomTooltip isDarkMode={isDarkMode} />} 
+              cursor={{ fill: isDarkMode ? 'hsl(160, 30%, 20%)' : 'hsl(160, 30%, 85%)' }} 
+            />
             <Bar 
               dataKey="income" 
               radius={[4, 4, 0, 0]}

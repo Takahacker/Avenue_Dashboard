@@ -1,107 +1,31 @@
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, MoreHorizontal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const clients = [
-  {
-    id: 1,
-    name: 'Adilson Ferreira da Silva Junior',
-    email: 'adilson.light@gmail.com',
-    banker: 'Francisco Luiz Hintze Maranho',
-    portfolio: 245000,
-    change: 8.5,
-    perfil: 'Low-Risk Portfolio',
-  },
-  {
-    id: 2,
-    name: 'Andre luis costa',
-    email: 'andreluiscosta.96@gmail.com',
-    banker: 'Bruno Leite Bernardes',
-    portfolio: 512390,
-    change: 12.3,
-    perfil: 'Balanced-Risk Portfolio',
-  },
-  {
-    id: 3,
-    name: 'BRUNA PAIVA SBOARINI',
-    email: 'vendasara1@gmail.com',
-    banker: 'Felipe De Oliveira Criscuolo',
-    portfolio: 178900,
-    change: 5.2,
-    perfil: 'Low-Risk Portfolio',
-  },
-  {
-    id: 4,
-    name: 'EDUARDO SBOARINI',
-    email: 'araimportsadm@gmail.com',
-    banker: 'Felipe De Oliveira Criscuolo',
-    portfolio: 345000,
-    change: 9.8,
-    perfil: 'Low-Risk Portfolio',
-  },
-  {
-    id: 5,
-    name: 'Ettore Vasconcellos Paiola',
-    email: 'ettorevp@gmail.com',
-    banker: 'Tiago Paiola Mantovani',
-    portfolio: 567800,
-    change: 18.5,
-    perfil: 'Aggressive-Risk Portfolio',
-  },
-  {
-    id: 6,
-    name: 'MARIA ALICE AMADO GOUVEIA VENTURINI',
-    email: 'JOSE.OTAVIO@TERRACONTTEMPORANEA.COM.BR',
-    banker: 'Eduardo Santo Corsatto Vieira',
-    portfolio: 289000,
-    change: 6.3,
-    perfil: 'Bonds',
-  },
-  {
-    id: 7,
-    name: 'Mara Silvia Porto Vilela',
-    email: 'VILELAMARA4@GMAIL.COM',
-    banker: 'Daniela Machado',
-    portfolio: 156700,
-    change: 3.8,
-    perfil: 'Low-Risk Portfolio',
-  },
-  {
-    id: 8,
-    name: 'SILVIO LUIZ VENTURINI',
-    email: 'silvio@terraconttemporanea.com.br',
-    banker: 'Eduardo Santo Corsatto Vieira',
-    portfolio: 423500,
-    change: 11.2,
-    perfil: 'Low-Risk Portfolio',
-  },
-  {
-    id: 9,
-    name: 'Wanderley Crestoni Fernandes',
-    email: 'wancrestoni@gmail.com',
-    banker: 'André Guilherme',
-    portfolio: 234567,
-    change: 7.5,
-    perfil: 'Conservador PF',
-  },
-  {
-    id: 10,
-    name: 'Jones Antonio Pagno',
-    email: 'jonespagno@gmail.com',
-    banker: 'Alan Finazzi Sbeghen',
-    portfolio: 198400,
-    change: 4.9,
-    perfil: 'Low-Risk Portfolio',
-  },
-  {
-    id: 11,
-    name: 'Agel Gustavo Turim',
-    email: 'agelgustavo@gmail.com',
-    banker: 'Eduardo Marquesi de Oliveira',
-    portfolio: 378600,
-    change: 13.7,
-    perfil: 'Balanced-Risk Portfolio',
-  },
-];
+interface ClientData {
+  nome: string;
+  cpf: string;
+  banker: string;
+  email: string;
+  pl: number;
+  data: string;
+}
+
+// Mapeamento de perfil por nome do cliente
+const clientProfiles: Record<string, string> = {
+  'Adilson Ferreira da Silva Junior': 'Low-Risk Portfolio',
+  'Andre luis costa': 'Balanced-Risk Portfolio',
+  'BRUNA PAIVA SBOARINI': 'Low-Risk Portfolio',
+  'EDUARDO SBOARINI': 'Low-Risk Portfolio',
+  'Ettore Vasconcellos Paiola': 'Aggressive-Risk Portfolio',
+  'MARIA ALICE AMADO GOUVEIA VENTURINI': 'Bonds',
+  'Mara Silvia Porto Vilela': 'Low-Risk Portfolio',
+  'SILVIO LUIZ VENTURINI': 'Low-Risk Portfolio',
+  'Wanderley Crestoni Fernandes': 'Conservador PF',
+  'Jones Antonio Pagno': 'Low-Risk Portfolio',
+  'Agel Gustavo Turim': 'Balanced-Risk Portfolio',
+};
 
 const allocationColors: Record<string, string> = {
   'Low-Risk Portfolio': 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -112,6 +36,43 @@ const allocationColors: Record<string, string> = {
 };
 
 const ClientsTable = () => {
+  const { isDarkMode } = useTheme();
+  const [clients, setClients] = useState<ClientData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastDate, setLastDate] = useState<string>('');
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8000/api/clients/pl?t=' + Date.now());
+        
+        if (!response.ok) {
+          throw new Error(`Erro: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          setClients(result.data);
+          setLastDate(result.lastDate);
+          setError(null);
+        } else {
+          throw new Error('Formato inválido da API');
+        }
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
+        console.error('❌ Erro:', errorMsg);
+        setError(errorMsg);
+        setClients([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, []);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -122,7 +83,7 @@ const ClientsTable = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-serif text-gold-gradient">Clientes Avenue</h3>
-          <p className="text-sm text-muted-foreground">Acompanhe a performance de seus clientes</p>
+          <p className={`text-sm ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>P&L dos clientes - {lastDate ? new Date(lastDate).toLocaleDateString('pt-BR') : 'Carregando...'}</p>
         </div>
         <motion.button
           className="px-4 py-2 rounded-xl glass-card-gold text-sm font-medium"
@@ -133,85 +94,90 @@ const ClientsTable = () => {
         </motion.button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-white/10">
-              <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Cliente
-              </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Portfólio
-              </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Variação
-              </th>
-              <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Perfil
-              </th>
-              <th className="text-right py-3 px-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((client, index) => (
-              <motion.tr
-                key={client.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group"
-              >
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-prunus-gold/30 to-prunus-green-light/30 flex items-center justify-center border border-prunus-gold/20">
-                      <span className="text-sm font-medium">
-                        {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </span>
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <p className={isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}>Carregando dados...</p>
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-red-400">Erro: {error}</p>
+        </div>
+      ) : clients.length === 0 ? (
+        <div className="flex items-center justify-center h-64">
+          <p className={isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}>Sem dados disponíveis</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className={`border-b ${isDarkMode ? 'border-white/10' : 'border-black/10'}`}>
+                <th className={`text-left py-3 px-4 text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>
+                  Cliente
+                </th>
+                <th className={`text-left py-3 px-4 text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>
+                  Banker
+                </th>
+                <th className={`text-left py-3 px-4 text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>
+                  Perfil
+                </th>
+                <th className={`text-left py-3 px-4 text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>
+                  P&L em {lastDate ? new Date(lastDate).toLocaleDateString('pt-BR') : 'carregando...'}
+                </th>
+                <th className="text-right py-3 px-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {clients.map((client, index) => (
+                <motion.tr
+                  key={client.cpf}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className={`border-b transition-colors cursor-pointer group ${isDarkMode ? 'border-white/5 hover:bg-white/5' : 'border-black/5 hover:bg-black/5'}`}
+                >
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-prunus-gold/30 to-prunus-green-light/30 flex items-center justify-center border border-prunus-gold/20">
+                        <span className="text-sm font-medium">
+                          {client.nome.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium group-hover:text-prunus-gold transition-colors">
+                          {client.nome}
+                        </p>
+                        <p className={`text-xs ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>{client.email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium group-hover:text-prunus-gold transition-colors">
-                        {client.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{client.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <span className="font-semibold">
-                    ${client.portfolio.toLocaleString('en-US')}
-                  </span>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-1">
-                    {client.change >= 0 ? (
-                      <TrendingUp className="w-4 h-4 text-green-400" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-red-400" />
-                    )}
-                    <span className={client.change >= 0 ? 'text-green-400' : 'text-red-400'}>
-                      {client.change >= 0 ? '+' : ''}{client.change}%
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sm">{client.banker}</span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className={`text-xs px-3 py-1 rounded-full border inline-block ${clientProfiles[client.nome] ? allocationColors[clientProfiles[client.nome]] || 'bg-gray-500/20 text-gray-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                      {clientProfiles[client.nome] || 'N/A'}
                     </span>
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${allocationColors[client.perfil]}`}>
-                    {client.perfil}
-                  </span>
-                </td>
-                <td className="py-4 px-4 text-right">
-                  <motion.button
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </motion.button>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="font-semibold">
+                      ${client.pl.toLocaleString('en-US')}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 text-right">
+                    <motion.button
+                      className={`p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </motion.button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </motion.div>
   );
 };

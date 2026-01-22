@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 import { LucideIcon } from 'lucide-react';
 
 interface MetricCardProps {
@@ -11,10 +12,12 @@ interface MetricCardProps {
 }
 
 const MetricCard = ({ title, value, change, changeType = 'neutral', icon: Icon, delay = 0 }: MetricCardProps) => {
+  const { isDarkMode } = useTheme();
+
   const changeColors = {
-    positive: 'text-green-400',
-    negative: 'text-red-400',
-    neutral: 'text-muted-foreground',
+    positive: isDarkMode ? 'text-green-400' : 'text-green-600',
+    negative: isDarkMode ? 'text-red-400' : 'text-red-600',
+    neutral: isDarkMode ? 'text-muted-foreground' : 'text-gray-600',
   };
 
   return (
@@ -43,7 +46,7 @@ const MetricCard = ({ title, value, change, changeType = 'neutral', icon: Icon, 
         )}
       </div>
       
-      <p className="text-sm text-muted-foreground mb-1">{title}</p>
+      <p className={`text-sm mb-1 ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>{title}</p>
       <motion.p
         className="text-2xl font-semibold text-gold-gradient"
         initial={{ scale: 0.9 }}

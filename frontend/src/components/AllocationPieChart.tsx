@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const scrollbarStyle = `
   .allocation-scrollbar::-webkit-scrollbar {
@@ -33,7 +34,7 @@ const data = [
   { name: 'Conservador PF', value: 1, color: 'hsl(0, 0%, 50%)' },
 ];
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload, isDarkMode }: any) => {
   if (active && payload && payload.length) {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     const percentage = ((payload[0].value / total) * 100).toFixed(1);
@@ -43,7 +44,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         animate={{ opacity: 1, scale: 1 }}
         className="glass-card-gold p-3"
       >
-        <p className="text-sm font-medium">{payload[0].name}</p>
+        <p className={`text-sm font-medium ${isDarkMode ? '' : 'text-gray-800'}`}>{payload[0].name}</p>
         <p className="text-lg font-semibold text-gold-gradient">{payload[0].value} clientes ({percentage}%)</p>
       </motion.div>
     );
@@ -52,6 +53,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 const AllocationPieChart = () => {
+  const { isDarkMode } = useTheme();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const handleMouseEnter = (_: any, index: number) => {
@@ -71,7 +73,7 @@ const AllocationPieChart = () => {
     >
       <div className="mb-4">
         <h3 className="text-lg font-serif text-gold-gradient">Distribuição de Perfis</h3>
-        <p className="text-sm text-muted-foreground">Distribuição por perfil de risco</p>
+        <p className={`text-sm ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>Distribuição por perfil de risco</p>
       </div>
 
       <div className="h-52">
@@ -104,7 +106,7 @@ const AllocationPieChart = () => {
                 />
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -113,7 +115,7 @@ const AllocationPieChart = () => {
         {data.map((item, index) => (
           <motion.div
             key={item.name}
-            className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
+            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${isDarkMode ? 'hover:bg-white/5' : 'hover:bg-black/5'}`}
             onMouseEnter={() => setActiveIndex(index)}
             onMouseLeave={() => setActiveIndex(null)}
             whileHover={{ x: 4 }}
@@ -122,7 +124,7 @@ const AllocationPieChart = () => {
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <span className="text-xs text-muted-foreground flex-1">{item.name}</span>
+            <span className={`text-xs flex-1 ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>{item.name}</span>
             <span className="text-xs font-medium">{item.value}</span>
           </motion.div>
         ))}

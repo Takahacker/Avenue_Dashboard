@@ -1,8 +1,11 @@
-import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 import avenueLogo from '@/assets/avenue-logo.png';
+import avenueLogoLight from '@/assets/Avenue_light_mode.png';
 
 const Header = () => {
+  const { isDarkMode } = useTheme();
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -12,25 +15,18 @@ const Header = () => {
     >
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3">
-          <img src={avenueLogo} alt="Avenue" className="h-8 w-auto" />
-          <div className="h-6 w-px bg-white/20" />
-          <h1 className="text-xl font-serif text-gold-gradient">Dashboard Avenue</h1>
+          <img src={isDarkMode ? avenueLogo : avenueLogoLight} alt="Avenue" className="h-8 w-auto" />
+          <div className={`h-6 w-px ${isDarkMode ? 'bg-white/20' : 'bg-black/10'}`} />
+          <div>
+            <h1 className="text-xl font-serif text-gold-gradient">Dashboard Avenue</h1>
+            <p className={`text-xs ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>período de 01/12/2025 a 30/01/2026</p>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar cliente..."
-            className="w-64 pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-prunus-gold/50 transition-colors"
-          />
-        </div>
-
         {/* Current Date */}
-        <div className="text-sm text-muted-foreground">
+        <div className={`text-sm ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>
           {new Date().toLocaleDateString('pt-BR', {
             weekday: 'long',
             day: 'numeric',

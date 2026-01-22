@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 import { 
   AreaChart, 
   Area, 
@@ -22,7 +23,7 @@ const data = [
   { date: '2025-01-13', value: 138072, client: 'André Guilherme' },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
   if (active && payload && payload.length) {
     return (
       <motion.div
@@ -30,7 +31,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         animate={{ opacity: 1, scale: 1 }}
         className="glass-card-gold p-4"
       >
-        <p className="text-xs text-muted-foreground mb-1">
+        <p className={`text-xs mb-1 ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>
           {new Date(label).toLocaleDateString('pt-BR')}
         </p>
         <p className="text-lg font-semibold text-gold-gradient">
@@ -48,6 +49,8 @@ interface PortfolioChartProps {
 }
 
 const PortfolioChart = ({ title, clientName }: PortfolioChartProps) => {
+  const { isDarkMode } = useTheme();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -58,11 +61,11 @@ const PortfolioChart = ({ title, clientName }: PortfolioChartProps) => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-serif text-gold-gradient">{title}</h3>
-          <p className="text-sm text-muted-foreground">{clientName}</p>
+          <p className={`text-sm ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>{clientName}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-prunus-gold" />
-          <span className="text-xs text-muted-foreground">P&L Total</span>
+          <span className={`text-xs ${isDarkMode ? 'text-muted-foreground' : 'text-gray-600'}`}>P&L Total</span>
         </div>
       </div>
 
@@ -75,19 +78,22 @@ const PortfolioChart = ({ title, clientName }: PortfolioChartProps) => {
                 <stop offset="95%" stopColor="hsl(39, 40%, 64%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(160, 30%, 25%)" />
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={isDarkMode ? "hsl(160, 30%, 25%)" : "hsl(160, 30%, 85%)"} 
+            />
             <XAxis 
               dataKey="date" 
-              stroke="hsl(0, 0%, 50%)"
+              stroke={isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)"}
               tickFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 11, fill: isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)" }}
             />
             <YAxis 
-              stroke="hsl(0, 0%, 50%)"
+              stroke={isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)"}
               tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 11, fill: isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)" }}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Area
               type="monotone"
               dataKey="value"

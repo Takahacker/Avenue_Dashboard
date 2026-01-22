@@ -1,10 +1,13 @@
-import { LayoutDashboard, Users, TrendingUp, PieChart, Settings, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Users, TrendingUp, PieChart, Briefcase, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 import prunusLogo from '@/assets/prunus-logo.png';
+import prunusLogoLight from '@/assets/Prunus_light_mode.png';
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onSettingsClick?: () => void;
 }
 
 const navItems = [
@@ -13,7 +16,9 @@ const navItems = [
   { id: 'bankers', label: 'Bankers', icon: Briefcase },
 ];
 
-const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
+const Sidebar = ({ activeTab, onTabChange, onSettingsClick }: SidebarProps) => {
+  const { isDarkMode } = useTheme();
+
   return (
     <motion.aside
       initial={{ x: -100, opacity: 0 }}
@@ -22,9 +27,9 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
       className="sidebar-glass fixed left-0 top-0 h-screen w-64 flex flex-col z-50"
     >
       {/* Logo Section */}
-      <div className="p-6 border-b border-white/10">
+      <div className={`p-6 ${isDarkMode ? 'border-white/10' : 'border-black/10'} border-b`}>
         <motion.img
-          src={prunusLogo}
+          src={isDarkMode ? prunusLogo : prunusLogoLight}
           alt="Prunus Asset"
           className="h-12 w-auto"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -57,12 +62,13 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         })}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-white/10">
+      {/* Settings Button at Bottom */}
+      <div className={`p-4 ${isDarkMode ? 'border-white/10' : 'border-black/10'} border-t`}>
         <motion.button
-          className="nav-item w-full text-muted-foreground hover:text-prunus-gold"
+          className={`nav-item w-full ${isDarkMode ? 'text-muted-foreground hover:text-prunus-gold' : 'text-gray-600 hover:text-prunus-gold'}`}
           whileHover={{ x: 4 }}
-          onClick={() => onTabChange('settings')}
+          whileTap={{ scale: 0.98 }}
+          onClick={onSettingsClick}
         >
           <Settings className="w-5 h-5" />
           <span>Configurações</span>
