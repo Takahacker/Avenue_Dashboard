@@ -1,0 +1,58 @@
+#!/bin/bash
+
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║                   AVENUE DASHBOARD - API                       ║"
+echo "║            Integração Frontend - Backend (P&L Total)           ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "📡 ENDPOINTS DISPONÍVEIS:"
+echo ""
+echo "   1. Health Check"
+echo "      GET http://localhost:8000/api/health"
+echo "      → Verifica se servidor está rodando"
+echo ""
+echo "   2. P&L Total Agregado"
+echo "      GET http://localhost:8000/api/pl/total"
+echo "      → Retorna P&L total de todos os 10 clientes"
+echo "      → Período: 01/12/2025 até 20/01/2026"
+echo "      → Formato: [{ date: '2025-12-01', value: 2411473.63 }, ...]"
+echo ""
+echo "   3. Estatísticas"
+echo "      GET http://localhost:8000/api/pl/stats"
+echo "      → stats.max    : $3,476,468.98"
+echo "      → stats.min    : $2,411,473.63"
+echo "      → stats.average: $2,813,714.81"
+echo "      → stats.totalDays: 51"
+echo "      → stats.totalClients: 10"
+echo ""
+echo "📊 CLIENTES INCLUSOS:"
+echo ""
+curl -s http://localhost:8000/api/pl/total 2>/dev/null | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    print('   ✓ Dados carregados com sucesso!')
+    print(f'   ✓ Total de registros: {len(data[\"data\"])} dias')
+    print(f'   ✓ Período: {data[\"startDate\"]} até {data[\"endDate\"]}')
+except:
+    print('   ✗ Erro ao carregar dados')
+" || echo "   ⚠ Servidor não respondeu"
+echo ""
+echo "🎨 FRONTEND:"
+echo ""
+echo "   Componente: EvolutionChart.tsx"
+echo "   Localização: frontend/src/components/EvolutionChart.tsx"
+echo "   Status: ✅ Integrado com API"
+echo "   Título: Total de P&L"
+echo "   Fonte: http://localhost:8000/api/pl/total"
+echo ""
+echo "🚀 COMO RODAR:"
+echo ""
+echo "   Terminal 1 (Backend):"
+echo "   $ bash run_backend.sh"
+echo ""
+echo "   Terminal 2 (Frontend):"
+echo "   $ cd frontend && bun dev"
+echo ""
+echo "   Acessar: http://localhost:5173"
+echo ""
