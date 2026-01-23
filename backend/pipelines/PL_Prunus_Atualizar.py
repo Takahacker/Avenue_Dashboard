@@ -274,13 +274,23 @@ def mesclar_dados(df_historico: pd.DataFrame, df_novo: pd.DataFrame) -> pd.DataF
         if col not in df_combinado.columns:
             df_combinado[col] = None
 
+    # Criar chave normalizada para melhor matching
+    df_combinado["_chave"] = (
+        df_combinado["Cliente"].str.strip().str.lower()
+        + "|"
+        + df_combinado["CPF"].astype(str).str.strip()
+    )
+
     # Fazer merge dos dados novos
     for _, row in df_novo.iterrows():
         cliente = row["Cliente"]
         cpf = row["CPF"]
 
-        # Procurar cliente no histórico
-        mask = (df_combinado["Cliente"] == cliente) & (df_combinado["CPF"] == cpf)
+        # Normalizar chave para busca
+        chave_novo = cliente.strip().lower() + "|" + str(cpf).strip()
+
+        # Procurar cliente no histórico usando chave normalizada
+        mask = df_combinado["_chave"] == chave_novo
 
         if mask.any():
             # Cliente já existe, atualizar colunas de data
@@ -289,9 +299,12 @@ def mesclar_dados(df_historico: pd.DataFrame, df_novo: pd.DataFrame) -> pd.DataF
                 df_combinado.at[idx, col] = row.get(col)
         else:
             # Cliente novo, adicionar como nova linha
-            df_combinado = pd.concat(
-                [df_combinado, pd.DataFrame([row])], ignore_index=True
-            )
+            nova_linha = pd.DataFrame([row])
+            nova_linha["_chave"] = chave_novo
+            df_combinado = pd.concat([df_combinado, nova_linha], ignore_index=True)
+
+    # Remover coluna auxiliar de chave
+    df_combinado = df_combinado.drop(columns=["_chave"])
 
     # Reordenar colunas
     colunas_ordenadas = colunas_indice + sorted(
