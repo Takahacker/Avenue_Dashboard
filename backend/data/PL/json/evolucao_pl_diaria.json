@@ -1,7 +1,7 @@
 [
   {
     "Cliente":"Adilson Ferreira da Silva Junior",
-    "CPF":"05458975723",
+    "CPF":5458975723,
     "Banker":"Francisco Luiz Hintze Maranho",
     "2025-12-01":92128.02,
     "2025-12-02":92200.01,
@@ -59,7 +59,7 @@
   },
   {
     "Cliente":"Andre luis costa",
-    "CPF":"37994367828",
+    "CPF":37994367828,
     "Banker":"Bruno Leite Bernardes",
     "2025-12-01":452793.1900000002,
     "2025-12-02":454173.81,
@@ -117,7 +117,7 @@
   },
   {
     "Cliente":"BRUNA PAIVA SBOARINI",
-    "CPF":"30582702836",
+    "CPF":30582702836,
     "Banker":"Felipe De Oliveira Criscuolo",
     "2025-12-01":76624.44,
     "2025-12-02":76664.78,
@@ -175,7 +175,7 @@
   },
   {
     "Cliente":"EDUARDO SBOARINI",
-    "CPF":"12512933873",
+    "CPF":12512933873,
     "Banker":"Felipe De Oliveira Criscuolo",
     "2025-12-01":92721.89,
     "2025-12-02":92795.24,
@@ -233,7 +233,7 @@
   },
   {
     "Cliente":"Ettore Vasconcellos Paiola",
-    "CPF":"32520950846",
+    "CPF":32520950846,
     "Banker":"Tiago Paiola Mantovani",
     "2025-12-01":109033.48,
     "2025-12-02":109034.93,
@@ -291,7 +291,7 @@
   },
   {
     "Cliente":"Jones Antonio Pagno",
-    "CPF":"06120709053",
+    "CPF":6120709053,
     "Banker":"Alan Finazzi Sbeghen",
     "2025-12-01":1305850.9299999999,
     "2025-12-02":1306101.28,
@@ -349,7 +349,7 @@
   },
   {
     "Cliente":"MARIA ALICE AMADO GOUVEIA VENTURINI",
-    "CPF":"05476840885",
+    "CPF":5476840885,
     "Banker":"Eduardo Santo Corsatto Vieira",
     "2025-12-01":69869.81,
     "2025-12-02":69915.48,
@@ -407,7 +407,7 @@
   },
   {
     "Cliente":"Mara Silvia Porto Vilela",
-    "CPF":"21244047848",
+    "CPF":21244047848,
     "Banker":"Daniela Machado",
     "2025-12-01":116925.38,
     "2025-12-02":116921.6,
@@ -465,7 +465,7 @@
   },
   {
     "Cliente":"SILVIO LUIZ VENTURINI",
-    "CPF":"46570551868",
+    "CPF":46570551868,
     "Banker":"Eduardo Santo Corsatto Vieira",
     "2025-12-01":95526.49,
     "2025-12-02":95559.83,
@@ -523,7 +523,7 @@
   },
   {
     "Cliente":"Wanderley Crestoni Fernandes",
-    "CPF":"08944277842",
+    "CPF":8944277842,
     "Banker":"André Guilherme",
     "2025-12-01":null,
     "2025-12-02":null,

@@ -9,9 +9,16 @@ from typing import Dict, List, Any
 from datetime import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+# Carrega variáveis de ambiente
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# Configurar CORS com origens específicas
+cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
+CORS(app, resources={r"/api/*": {"origins": cors_origins}})
 
 # Carregando dados de P&L
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -807,4 +814,6 @@ def get_captacao_evolucao():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8000)
+    port = int(os.getenv("PORT", 5000))
+    debug = os.getenv("FLASK_ENV", "development") == "development"
+    app.run(debug=debug, port=port, host="0.0.0.0")

@@ -1,2 +1,45 @@
+# Environment variables
 backend/.env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Node/Bun (Frontend)
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.turbo/
+frontend/bun.lockb
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Railway
+.railway/
+
+# Postman
 backend/Avenue API.postman_collection.json

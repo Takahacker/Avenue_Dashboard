@@ -1,0 +1,57 @@
+name: Daily Data Update
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 9 AM UTC todo dia (segunda a sexta)
+  workflow_dispatch: # Permite disparo manual
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Run PL Pipeline
+        env:
+          LOOKER_CLIENT_ID: ${{ secrets.LOOKER_CLIENT_ID }}
+          LOOKER_CLIENT_SECRET: ${{ secrets.LOOKER_CLIENT_SECRET }}
+        run: |
+          cd backend
+          python pipelines/PL_Prunus_Atualizar.py
+
+      - name: Run NetInflow Pipeline
+        env:
+          LOOKER_CLIENT_ID: ${{ secrets.LOOKER_CLIENT_ID }}
+          LOOKER_CLIENT_SECRET: ${{ secrets.LOOKER_CLIENT_SECRET }}
+        run: |
+          cd backend
+          python pipelines/NetInflow_Prunus.py
+        continue-on-error: true # Continua mesmo se falhar
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-action@avenue.com"
+          git config --local user.name "Avenue Bot"
+          git add backend/data/
+          git diff --quiet && git diff --staged --quiet || (
+            git commit -m "Update data - $(date +'%Y-%m-%d %H:%M:%S UTC')" && 
+            git push
+          )
+        continue-on-error: true # Não falha se não houver mudanças
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Pipeline falhou! Verifique os logs."
+          exit 1
