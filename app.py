@@ -56,6 +56,24 @@ def load_cliente_emails() -> Dict[str, str]:
     return emails
 
 
+def load_cliente_bankers() -> Dict[str, str]:
+    """Carrega bankers dos clientes do arquivo cliente_perfil.txt"""
+    bankers = {}
+    try:
+        with open(CLIENTE_PERFIL_PATH, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            # Pula o header (primeira linha)
+            for line in lines[1:]:
+                parts = [p.strip() for p in line.split(",")]
+                if len(parts) >= 2:
+                    nome = parts[0]
+                    banker = parts[1] if len(parts) > 1 else "Sem Banker"
+                    bankers[nome] = banker
+    except Exception as e:
+        print(f"Erro ao carregar cliente_perfil.txt: {e}")
+    return bankers
+
+
 def aggregate_total_pl(data: List[Dict[str, Any]]) -> Dict[str, float]:
     """Agrega P&L total de todos os clientes por data"""
     pl_total = {}
@@ -524,6 +542,7 @@ def get_metrics():
     """Retorna métricas principais do dashboard"""
     try:
         data = load_pl_data()
+        bankers_map = load_cliente_bankers()
         if not data:
             return jsonify({"success": False, "error": "No client data available"}), 404
 
@@ -546,14 +565,26 @@ def get_metrics():
 
         clientes_primeira = clientes_ultima = 0
         pl_primeira = pl_ultima = 0
+        bankers_pl = {}
 
         for cliente in data:
+            cliente_nome = cliente.get("Cliente", "")
+            banker = bankers_map.get(cliente_nome, cliente.get("Banker", "Sem Banker"))
+
             if first_date in cliente and cliente[first_date] is not None:
                 clientes_primeira += 1
                 pl_primeira += float(cliente[first_date])
             if last_date in cliente and cliente[last_date] is not None:
                 clientes_ultima += 1
                 pl_ultima += float(cliente[last_date])
+                pl_value = float(cliente[last_date])
+                if banker not in bankers_pl:
+                    bankers_pl[banker] = 0
+                bankers_pl[banker] += pl_value
+
+        # Calcular Top 3 Bankers por P&L total
+        top3_bankers = sorted(bankers_pl.items(), key=lambda x: x[1], reverse=True)[:3]
+        top3_list = [{"nome": nome, "pl": round(pl, 2)} for nome, pl in top3_bankers]
 
         return jsonify(
             {
@@ -569,7 +600,7 @@ def get_metrics():
                         2,
                     ),
                     "captacaoPeriodo": 0,
-                    "top3Bankers": [],
+                    "top3Bankers": top3_list,
                     "periodoInicio": first_date,
                     "periodoFim": last_date,
                 },
