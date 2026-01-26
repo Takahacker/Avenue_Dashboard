@@ -596,7 +596,27 @@ def get_metrics():
                     bankers_captacao[banker] = 0
                 bankers_captacao[banker] += flow_value
 
-        # Se não há dados de netinflow, usar P&L inicial como proxy de captação
+        # Incluir clientes novos (primeira data != 2025-12-01) como captação
+        for cliente in data:
+            cliente_nome = cliente.get("Cliente", "")
+            banker = cliente_to_banker.get(cliente_nome)
+
+            # Verificar se é cliente novo (primeira data não é 2025-12-01)
+            primeiro_valor = None
+            primeira_data = None
+            for date in sorted_dates:
+                if date in cliente and cliente[date] is not None:
+                    primeira_data = date
+                    primeiro_valor = float(cliente[date])
+                    break
+
+            # Se primeira data não é 2025-12-01, é cliente novo - contar como captação
+            if primeiro_valor and primeira_data and primeira_data != "2025-12-01":
+                if banker not in bankers_captacao:
+                    bankers_captacao[banker] = 0
+                bankers_captacao[banker] += primeiro_valor
+
+        # Se ainda não há dados de captação, usar P&L inicial como proxy
         if not bankers_captacao:
             for cliente in data:
                 cliente_nome = cliente.get("Cliente", "")
