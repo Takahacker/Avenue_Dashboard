@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { fetchAPI } from '@/lib/apiConfig';
 import BankersEvolutionChart from '../components/BankersEvolutionChart';
 import BankerCard from '../components/BankerCard';
 import BankersCaptacaoChart from '../components/BankersCaptacaoChart';
@@ -42,8 +43,8 @@ const Bankers = () => {
         
         // Fetch ambos os endpoints em paralelo
         const [captacaoRes, plRes] = await Promise.all([
-          fetch('http://localhost:8000/api/bankers/captacao?t=' + Date.now()),
-          fetch('http://localhost:8000/api/bankers/evolution?t=' + Date.now())
+          fetchAPI('/api/bankers/captacao'),
+          fetchAPI('/api/bankers/evolution')
         ]);
         
         if (!captacaoRes.ok || !plRes.ok) {

@@ -33,7 +33,7 @@ const CaptacaoEvolutionChart = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/captacao/evolucao?t=' + Date.now());
+        const response = await fetchAPI('/api/captacao/evolucao');
         
         if (!response.ok) {
           throw new Error(`Erro: ${response.status}`);

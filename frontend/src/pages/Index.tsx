@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, DollarSign, TrendingUp, Briefcase } from 'lucide-react';
+import { fetchAPI } from '@/lib/apiConfig';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
@@ -33,7 +34,7 @@ const Index = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/metrics?t=' + Date.now());
+        const response = await fetchAPI('/api/metrics');
         const result = await response.json();
         if (result.success) {
           setMetrics(result.metrics);

@@ -46,7 +46,7 @@ const ClientsTable = () => {
     const fetchClients = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/clients/pl?t=' + Date.now());
+        const response = await fetchAPI('/api/clients/pl');
         
         if (!response.ok) {
           throw new Error(`Erro: ${response.status}`);

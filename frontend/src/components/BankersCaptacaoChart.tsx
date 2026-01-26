@@ -56,7 +56,7 @@ const BankersCaptacaoChart = ({ bankerOrder }: BankersEvolutionChartProps) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/bankers/captacao?t=' + Date.now());
+        const response = await fetchAPI('/api/bankers/captacao');
         
         if (!response.ok) {
           throw new Error(`Erro: ${response.status}`);

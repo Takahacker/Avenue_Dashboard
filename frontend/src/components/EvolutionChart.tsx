@@ -11,6 +11,8 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
+import { fetchAPI } from '@/lib/apiConfig';
+
 interface ChartData {
   date: string;
   value: number;
@@ -50,7 +52,7 @@ const EvolutionChart = ({ clientName }: EvolutionChartProps) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/pl/total?t=' + Date.now());
+        const response = await fetchAPI('/api/pl/total');
         
         if (!response.ok) {
           throw new Error(`Erro: ${response.status}`);

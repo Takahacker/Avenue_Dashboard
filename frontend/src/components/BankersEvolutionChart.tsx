@@ -36,7 +36,7 @@ const BankersEvolutionChart = ({ bankerOrder }: BankersEvolutionChartProps) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/bankers/evolution?t=' + Date.now());
+        const response = await fetchAPI('/api/bankers/evolution');
         
         if (!response.ok) {
           throw new Error(`Erro: ${response.status}`);

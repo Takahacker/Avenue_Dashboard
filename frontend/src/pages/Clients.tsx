@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, X } from 'lucide-react';
+import { fetchAPI } from '@/lib/apiConfig';
 import ClientCard from '@/components/ClientCard';
 
 interface ClientEvolution {
@@ -25,7 +26,7 @@ const ClientsView = () => {
     const fetchClientsEvolution = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/clients/evolution?t=' + Date.now());
+        const response = await fetchAPI('/api/clients/evolution');
         
         if (!response.ok) {
           throw new Error(`Erro: ${response.status}`);
