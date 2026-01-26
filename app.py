@@ -576,6 +576,11 @@ def get_metrics():
             return jsonify({"success": False, "error": "No dates found"}), 404
 
         sorted_dates = sorted(all_dates)
+        # Filtrar apenas datas >= 01/12/2025 para as métricas
+        metric_dates = [d for d in sorted_dates if d >= "2025-12-01"]
+
+        if not metric_dates:
+            return jsonify({"success": False, "error": "No data in metric period"}), 404
 
         # Período para a métrica "Captação do Período" (01/12 a 31/01)
         periodo_captacao_inicio = "2025-12-01"
@@ -585,7 +590,7 @@ def get_metrics():
         top_bankers_inicio = "2025-11-01"
         top_bankers_fim = "2026-01-31"
 
-        first_date, last_date = sorted_dates[0], sorted_dates[-1]
+        first_date, last_date = metric_dates[0], metric_dates[-1]
 
         clientes_primeira = clientes_ultima = 0
         pl_primeira = pl_ultima = 0
