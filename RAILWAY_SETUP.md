@@ -197,8 +197,8 @@ Acesse http://localhost:5173 e verifique se os gráficos carregam.
 ## 📊 URLs Finais
 
 - **Frontend**: `https://avenuedashboard.vercel.app` ✅
-- **Backend**: `https://sua-url-railway.up.railway.app` (substituir com URL real)
-- **API**: `https://sua-url-railway.up.railway.app/api/pl/total`
+- **Backend**: `https://avenuedashboard-production.up.railway.app` ✅
+- **API**: `https://avenuedashboard-production.up.railway.app/api/pl/total` ✅
 
 ---
 
