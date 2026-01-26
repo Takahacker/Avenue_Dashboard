@@ -632,16 +632,19 @@ def get_metrics():
                             bankers_captacao[banker] = 0
                         bankers_captacao[banker] += pl_value
 
-        # Calcular Top 3 Bankers por captação
+        # Calcular Top 3 Bankers por captação (excluindo Alan Finazzi Sbeghen)
+        bankers_for_top = {
+            k: v for k, v in bankers_captacao.items() if k != "Alan Finazzi Sbeghen"
+        }
         top3_bankers = sorted(
-            bankers_captacao.items(), key=lambda x: x[1], reverse=True
+            bankers_for_top.items(), key=lambda x: x[1], reverse=True
         )[:3]
         top3_list = [
             {"nome": nome, "captacao": round(captacao, 2)}
             for nome, captacao in top3_bankers
         ]
 
-        # Captação total do período
+        # Captação total do período (mantém contribuições de todos, incluindo Alan)
         captacao_total = sum(bankers_captacao.values())
 
         return jsonify(
