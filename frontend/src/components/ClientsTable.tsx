@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { fetchAPI } from '@/lib/apiConfig';
 
 interface ClientData {
   nome: string;

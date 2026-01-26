@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { fetchAPI } from '@/lib/apiConfig';
 import { BANKER_COLORS } from '@/lib/colors';
 import { 
   LineChart, 
