@@ -1,1 +1,1 @@
-web: cd backend && gunicorn -w 1 -b 0.0.0.0:$PORT api:app
+web: cd backend && gunicorn -w 1 -b 0.0.0.0:$PORT --timeout 60 api:app

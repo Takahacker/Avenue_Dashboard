@@ -1,10 +1,10 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "DOCKERFILE"
+    "builder": "BUILDPACKS"
   },
   "deploy": {
     "numReplicas": 1,
-    "startCommand": "cd backend && gunicorn -w 1 -b 0.0.0.0:$PORT api:app"
+    "startCommand": "gunicorn -w 1 -b 0.0.0.0:$PORT --timeout 60 api:app"
   }
 }
