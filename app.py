@@ -230,11 +230,13 @@ def get_clients_evolution():
             return jsonify({"success": False, "error": "No dates found"}), 404
 
         sorted_dates = sorted(all_dates)
+        # Filtrar apenas datas >= 01/12/2025 para exibição nos gráficos
+        display_dates = [d for d in sorted_dates if d >= "2025-12-01"]
         clients_evolution = []
 
         for cliente in data:
             evolution_data = []
-            for date in sorted_dates:
+            for date in display_dates:
                 if date in cliente and cliente[date] is not None:
                     pl_value = float(cliente[date])
                     evolution_data.append({"date": date, "value": round(pl_value, 2)})
@@ -266,8 +268,8 @@ def get_clients_evolution():
                 "success": True,
                 "data": clients_evolution,
                 "totalClientes": len(clients_evolution),
-                "periodoInicio": sorted_dates[0],
-                "periodoFim": sorted_dates[-1],
+                "periodoInicio": display_dates[0] if display_dates else None,
+                "periodoFim": display_dates[-1] if display_dates else None,
             }
         )
     except Exception as e:
@@ -297,6 +299,8 @@ def get_bankers_evolution():
             return jsonify({"success": False, "error": "No dates found"}), 404
 
         sorted_dates = sorted(all_dates)
+        # Filtrar apenas datas >= 01/12/2025 para exibição nos gráficos
+        display_dates = [d for d in sorted_dates if d >= "2025-12-01"]
         bankers_data = {}
 
         for cliente in data:
@@ -314,7 +318,7 @@ def get_bankers_evolution():
         bankers_evolution = []
         for banker_nome, banker_info in bankers_data.items():
             evolution_list = []
-            for date in sorted_dates:
+            for date in display_dates:
                 if date in banker_info["evolution"]:
                     evolution_list.append(
                         {
@@ -348,8 +352,8 @@ def get_bankers_evolution():
                 "success": True,
                 "data": bankers_evolution,
                 "totalBankers": len(bankers_evolution),
-                "periodoInicio": sorted_dates[0],
-                "periodoFim": sorted_dates[-1],
+                "periodoInicio": display_dates[0] if display_dates else None,
+                "periodoFim": display_dates[-1] if display_dates else None,
             }
         )
     except Exception as e:
@@ -515,7 +519,12 @@ def get_captacao_evolucao():
         evolution_list = []
         accumulated = 0
         all_dates_captacao = set(sorted_dates) | set(captacao_by_date.keys())
-        for date in sorted(all_dates_captacao):
+        # Filtrar apenas datas >= 01/12/2025 para exibição
+        display_dates_captacao = [
+            d for d in sorted(all_dates_captacao) if d >= "2025-12-01"
+        ]
+
+        for date in display_dates_captacao:
             if date in captacao_by_date:
                 accumulated += captacao_by_date[date]
             evolution_list.append({"date": date, "value": round(accumulated, 2)})
@@ -525,11 +534,11 @@ def get_captacao_evolucao():
                 "success": True,
                 "data": evolution_list,
                 "captacao_total": round(accumulated, 2),
-                "periodoInicio": sorted(all_dates_captacao)[0]
-                if all_dates_captacao
+                "periodoInicio": display_dates_captacao[0]
+                if display_dates_captacao
                 else None,
-                "periodoFim": sorted(all_dates_captacao)[-1]
-                if all_dates_captacao
+                "periodoFim": display_dates_captacao[-1]
+                if display_dates_captacao
                 else None,
             }
         )
@@ -567,15 +576,15 @@ def get_metrics():
             return jsonify({"success": False, "error": "No dates found"}), 404
 
         sorted_dates = sorted(all_dates)
-        
+
         # Período para a métrica "Captação do Período" (01/12 a 31/01)
         periodo_captacao_inicio = "2025-12-01"
         periodo_captacao_fim = "2026-01-31"
-        
+
         # Período para Top 3 Bankers (01/11 a 31/01)
         top_bankers_inicio = "2025-11-01"
         top_bankers_fim = "2026-01-31"
-        
+
         first_date, last_date = sorted_dates[0], sorted_dates[-1]
 
         clientes_primeira = clientes_ultima = 0
@@ -602,14 +611,14 @@ def get_metrics():
             flow_date = flow.get("net_inflow.date", "")
             flow_value = flow.get("net_inflow.net_inflow_usd", 0)
             banker = cliente_to_banker.get(cliente_nome)
-            
+
             if banker and flow_value > 0:
                 # Adicionar ao período da métrica (01/12 a 31/01)
                 if periodo_captacao_inicio <= flow_date <= periodo_captacao_fim:
                     if banker not in bankers_captacao_periodo:
                         bankers_captacao_periodo[banker] = 0
                     bankers_captacao_periodo[banker] += flow_value
-                
+
                 # Adicionar ao período do ranking (01/11 a 31/01)
                 if top_bankers_inicio <= flow_date <= top_bankers_fim:
                     if banker not in bankers_captacao_ranking:
@@ -641,7 +650,7 @@ def get_metrics():
                     if banker not in bankers_captacao_periodo:
                         bankers_captacao_periodo[banker] = 0
                     bankers_captacao_periodo[banker] += primeiro_valor
-                
+
                 # Adicionar ao período do ranking (01/11 a 31/01)
                 if primeira_data >= top_bankers_inicio:
                     if banker not in bankers_captacao_ranking:
@@ -659,14 +668,16 @@ def get_metrics():
                         if banker not in bankers_captacao_periodo:
                             bankers_captacao_periodo[banker] = 0
                         bankers_captacao_periodo[banker] += pl_value
-                        
+
                         if banker not in bankers_captacao_ranking:
                             bankers_captacao_ranking[banker] = 0
                         bankers_captacao_ranking[banker] += pl_value
 
         # Calcular Top 3 Bankers por captação ranking (excluindo Alan Finazzi Sbeghen)
         bankers_for_top = {
-            k: v for k, v in bankers_captacao_ranking.items() if k != "Alan Finazzi Sbeghen"
+            k: v
+            for k, v in bankers_captacao_ranking.items()
+            if k != "Alan Finazzi Sbeghen"
         }
         top3_bankers = sorted(
             bankers_for_top.items(), key=lambda x: x[1], reverse=True

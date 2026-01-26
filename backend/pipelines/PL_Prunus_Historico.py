@@ -34,27 +34,27 @@ ACCESS_TOKEN = None
 def autenticar_looker() -> str:
     """
     Autentica com a API Looker usando OAuth2 (client_id e client_secret).
-    
+
     Returns:
         Token de acesso para usar nas requisições
     """
     global ACCESS_TOKEN
-    
+
     payload = {
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
     }
-    
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    
+
     try:
         resp = requests.post(
             f"{LOOKER_BASE_URL}{LOGIN_ENDPOINT}",
             data=payload,
             headers=headers,
-            timeout=30
+            timeout=30,
         )
         resp.raise_for_status()
         token = resp.json().get("access_token")
@@ -98,7 +98,10 @@ def fetch_dados_looker(data: str) -> List[Dict]:
 
     try:
         resp = requests.post(
-            f"{LOOKER_BASE_URL}{QUERY_ENDPOINT}", headers=headers, json=payload, timeout=60
+            f"{LOOKER_BASE_URL}{QUERY_ENDPOINT}",
+            headers=headers,
+            json=payload,
+            timeout=60,
         )
         resp.raise_for_status()
         return resp.json()
@@ -107,7 +110,9 @@ def fetch_dados_looker(data: str) -> List[Dict]:
         return []
 
 
-def processar_dados(datas: List[str], clientes_prunus: List[str], mapeamento_banker: Dict[str, str]) -> pd.DataFrame:
+def processar_dados(
+    datas: List[str], clientes_prunus: List[str], mapeamento_banker: Dict[str, str]
+) -> pd.DataFrame:
     """
     Processa dados diários e cria DataFrame pivotado com soma de auc_usd por cliente por dia.
 
@@ -173,7 +178,7 @@ def processar_dados(datas: List[str], clientes_prunus: List[str], mapeamento_ban
         resultados,
         indice=["Cliente", "CPF", "Banker"],
         colunas="Data",
-        valores="Soma_USD"
+        valores="Soma_USD",
     )
 
     return df_pivot
@@ -187,6 +192,7 @@ def salvar_banco_dados(df: pd.DataFrame):
         df: DataFrame a ser salvo
     """
     from utils import salvar_banco_dados as save_data
+
     save_data(df, prefixo="evolucao_pl_diaria")
 
 
@@ -217,8 +223,8 @@ def main():
     mapeamento_banker = carregar_mapeamento_banker("banker_list.txt")
 
     # Gerar datas diárias
-    print("\n4. Gerando datas diárias de 01/12/2025 até hoje...")
-    datas = gerar_datas_diarias("2025-12-01")
+    print("\n4. Gerando datas diárias de 01/11/2025 até hoje...")
+    datas = gerar_datas_diarias("2025-11-01")
     print(f"   Total de dias: {len(datas)}")
     print(f"   Período: {datas[0]} a {datas[-1]}")
 
