@@ -543,6 +543,12 @@ def get_metrics():
     try:
         data = load_pl_data()
         bankers_map = load_cliente_bankers()
+        try:
+            with open(NETINFLOW_PATH, "r", encoding="utf-8") as f:
+                netinflow_data = json.load(f)
+        except:
+            netinflow_data = []
+
         if not data:
             return jsonify({"success": False, "error": "No client data available"}), 404
 
@@ -565,11 +571,13 @@ def get_metrics():
 
         clientes_primeira = clientes_ultima = 0
         pl_primeira = pl_ultima = 0
-        bankers_pl = {}
+        bankers_captacao = {}
+        cliente_to_banker = {}
 
         for cliente in data:
             cliente_nome = cliente.get("Cliente", "")
             banker = bankers_map.get(cliente_nome, cliente.get("Banker", "Sem Banker"))
+            cliente_to_banker[cliente_nome] = banker
 
             if first_date in cliente and cliente[first_date] is not None:
                 clientes_primeira += 1
@@ -577,14 +585,40 @@ def get_metrics():
             if last_date in cliente and cliente[last_date] is not None:
                 clientes_ultima += 1
                 pl_ultima += float(cliente[last_date])
-                pl_value = float(cliente[last_date])
-                if banker not in bankers_pl:
-                    bankers_pl[banker] = 0
-                bankers_pl[banker] += pl_value
 
-        # Calcular Top 3 Bankers por P&L total
-        top3_bankers = sorted(bankers_pl.items(), key=lambda x: x[1], reverse=True)[:3]
-        top3_list = [{"nome": nome, "pl": round(pl, 2)} for nome, pl in top3_bankers]
+        # Calcular captação por banker a partir do netinflow
+        for flow in netinflow_data:
+            cliente_nome = flow.get("net_inflow.client_name", "")
+            flow_value = flow.get("net_inflow.net_inflow_usd", 0)
+            banker = cliente_to_banker.get(cliente_nome)
+            if banker and flow_value > 0:
+                if banker not in bankers_captacao:
+                    bankers_captacao[banker] = 0
+                bankers_captacao[banker] += flow_value
+
+        # Se não há dados de netinflow, usar P&L inicial como proxy de captação
+        if not bankers_captacao:
+            for cliente in data:
+                cliente_nome = cliente.get("Cliente", "")
+                banker = cliente_to_banker.get(cliente_nome)
+                if first_date in cliente and cliente[first_date] is not None:
+                    pl_value = float(cliente[first_date])
+                    if pl_value > 0:
+                        if banker not in bankers_captacao:
+                            bankers_captacao[banker] = 0
+                        bankers_captacao[banker] += pl_value
+
+        # Calcular Top 3 Bankers por captação
+        top3_bankers = sorted(
+            bankers_captacao.items(), key=lambda x: x[1], reverse=True
+        )[:3]
+        top3_list = [
+            {"nome": nome, "captacao": round(captacao, 2)}
+            for nome, captacao in top3_bankers
+        ]
+
+        # Captação total do período
+        captacao_total = sum(bankers_captacao.values())
 
         return jsonify(
             {
@@ -599,7 +633,7 @@ def get_metrics():
                         else 0,
                         2,
                     ),
-                    "captacaoPeriodo": 0,
+                    "captacaoPeriodo": round(captacao_total, 2),
                     "top3Bankers": top3_list,
                     "periodoInicio": first_date,
                     "periodoFim": last_date,
