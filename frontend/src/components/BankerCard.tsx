@@ -21,10 +21,10 @@ const BankerCard = ({ banker, bankerOrder }: BankerCardProps) => {
   const color = BANKER_COLORS[bankerIndex % BANKER_COLORS.length];
   
   const isPositive = banker.variacao >= 0;
-  const variationPercent = banker.pl_inicial !== 0 ? ((banker.variacao / banker.pl_inicial) * 100).toFixed(2) : '0';
+  const variationPercent = (banker.pl_inicial && banker.pl_inicial !== 0) ? ((banker.variacao / banker.pl_inicial) * 100).toFixed(2) : '0';
 
   // Formata dados para o gráfico
-  const chartData = banker.evolution.map(item => {
+  const chartData = (banker.evolution || []).map(item => {
     const [year, month, day] = item.date.split('-');
     return {
       ...item,
@@ -90,7 +90,7 @@ const BankerCard = ({ banker, bankerOrder }: BankerCardProps) => {
             <YAxis 
               stroke="rgba(255,255,255,0.3)"
               style={{ fontSize: '12px' }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              tickFormatter={(value) => value !== undefined && value !== null ? `$${(Number(value) / 1000).toFixed(0)}K` : '$0K'}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line

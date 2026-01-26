@@ -19,16 +19,17 @@ interface ClientCardProps {
 
 const ClientCard = ({ client, delay = 0 }: ClientCardProps) => {
   const isPositive = client.variacao >= 0;
-  const variationPercent = client.pl_inicial !== 0 
+  const variationPercent = (client.pl_inicial && client.pl_inicial !== 0)
     ? ((client.variacao / client.pl_inicial) * 100).toFixed(2)
     : '0.00';
 
   // Verifica se é novo cliente (primeira data não é 2025-12-01)
-  const firstDate = client.evolution[0]?.date || '';
+  const firstDate = client.evolution?.[0]?.date || '';
   const isNewClient = firstDate !== '2025-12-01';
 
-  const formatValue = (value: number) => {
-    return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  const formatValue = (value: number | undefined) => {
+    if (value === undefined || value === null) return '$0';
+    return '$' + Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
   };
 
   const formatDate = (dateString: string) => {
@@ -118,7 +119,7 @@ const ClientCard = ({ client, delay = 0 }: ClientCardProps) => {
             <YAxis 
               stroke="rgba(255,255,255,0.3)"
               style={{ fontSize: '12px' }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              tickFormatter={(value) => value !== undefined && value !== null ? `$${(Number(value) / 1000).toFixed(0)}K` : '$0K'}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line

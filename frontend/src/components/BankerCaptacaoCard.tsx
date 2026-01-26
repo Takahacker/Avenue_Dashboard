@@ -34,7 +34,7 @@ const BankerCaptacaoCard = ({ banker, color }: BankerCaptacaoCardProps) => {
   }
 
   const variacao = banker.captacao_final - banker.captacao_inicial;
-  const porcento = ((variacao / banker.captacao_inicial) * 100).toFixed(1);
+  const porcento = (banker.captacao_inicial && banker.captacao_inicial !== 0) ? ((variacao / banker.captacao_inicial) * 100).toFixed(1) : '0';
   const isPositive = variacao >= 0;
 
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -95,7 +95,7 @@ const BankerCaptacaoCard = ({ banker, color }: BankerCaptacaoCardProps) => {
             <YAxis 
               stroke="rgba(255,255,255,0.2)"
               tick={{ fontSize: 9 }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              tickFormatter={(value) => value !== undefined && value !== null ? `$${(Number(value) / 1000).toFixed(0)}K` : '$0K'}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line

@@ -37,7 +37,7 @@ const data = [
 const CustomTooltip = ({ active, payload, isDarkMode }: any) => {
   if (active && payload && payload.length) {
     const total = data.reduce((sum, item) => sum + item.value, 0);
-    const percentage = ((payload[0].value / total) * 100).toFixed(1);
+    const percentage = (total > 0) ? ((payload[0].value / total) * 100).toFixed(1) : '0';
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}

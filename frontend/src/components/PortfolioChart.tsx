@@ -90,7 +90,7 @@ const PortfolioChart = ({ title, clientName }: PortfolioChartProps) => {
             />
             <YAxis 
               stroke={isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)"}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => value !== undefined && value !== null ? `$${(Number(value) / 1000).toFixed(0)}k` : '$0k'}
               tick={{ fontSize: 11, fill: isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)" }}
             />
             <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />

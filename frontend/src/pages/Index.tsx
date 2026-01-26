@@ -49,14 +49,17 @@ const Index = () => {
     fetchMetrics();
   }, []);
 
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return '$' + (value / 1000000).toFixed(3) + 'M';
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || value === null) return '$0';
+    const numValue = Number(value);
+    if (isNaN(numValue)) return '$0';
+    if (numValue >= 1000000) {
+      return '$' + (numValue / 1000000).toFixed(3) + 'M';
     }
-    if (value >= 1000) {
-      return '$' + (value / 1000).toFixed(0) + 'K';
+    if (numValue >= 1000) {
+      return '$' + (numValue / 1000).toFixed(0) + 'K';
     }
-    return '$' + value.toFixed(0);
+    return '$' + numValue.toFixed(0);
   };
 
   return (

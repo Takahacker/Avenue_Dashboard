@@ -152,7 +152,7 @@ const EvolutionChart = ({ clientName }: EvolutionChartProps) => {
               />
               <YAxis 
                 stroke={isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)"}
-                tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
+                tickFormatter={(value) => value !== undefined && value !== null ? `$${(Number(value) / 1000000).toFixed(0)}M` : '$0M'}
                 tick={{ fontSize: 10, fill: isDarkMode ? "hsl(0, 0%, 50%)" : "hsl(160, 20%, 40%)" }}
                 domain={['dataMin - 100000', 'dataMax + 100000']}
               />

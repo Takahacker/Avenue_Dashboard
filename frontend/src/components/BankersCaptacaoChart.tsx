@@ -247,7 +247,7 @@ const BankersCaptacaoChart = ({ bankerOrder }: BankersEvolutionChartProps) => {
             />
             <YAxis 
               stroke={isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(45, 95, 63, 0.5)"}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              tickFormatter={(value) => value !== undefined && value !== null ? `$${(Number(value) / 1000).toFixed(0)}K` : '$0K'}
               tick={{ fontSize: 10, fill: isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(45, 95, 63, 0.7)" }}
             />
             <Tooltip content={<CustomTooltip />} />
