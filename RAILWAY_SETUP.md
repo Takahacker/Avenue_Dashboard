@@ -76,7 +76,7 @@ LOOKER_CLIENT_ID=seu_client_id_real
 LOOKER_CLIENT_SECRET=seu_client_secret_real
 FLASK_ENV=production
 FLASK_DEBUG=False
-CORS_ORIGINS=https://seu-frontend.vercel.app,http://localhost:5173
+CORS_ORIGINS=https://avenuedashboard.vercel.app,http://localhost:5173
 ```
 
 ### 2.5 Deploy
@@ -196,9 +196,9 @@ Acesse http://localhost:5173 e verifique se os gráficos carregam.
 
 ## 📊 URLs Finais
 
-- **Frontend**: `https://seu-projeto.vercel.app`
-- **Backend**: `https://avenue-dashboard-prod.up.railway.app`
-- **API**: `https://avenue-dashboard-prod.up.railway.app/api/pl/total`
+- **Frontend**: `https://avenuedashboard.vercel.app` ✅
+- **Backend**: `https://sua-url-railway.up.railway.app` (substituir com URL real)
+- **API**: `https://sua-url-railway.up.railway.app/api/pl/total`
 
 ---
 
