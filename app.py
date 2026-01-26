@@ -567,11 +567,21 @@ def get_metrics():
             return jsonify({"success": False, "error": "No dates found"}), 404
 
         sorted_dates = sorted(all_dates)
+        
+        # Período para a métrica "Captação do Período" (01/12 a 31/01)
+        periodo_captacao_inicio = "2025-12-01"
+        periodo_captacao_fim = "2026-01-31"
+        
+        # Período para Top 3 Bankers (01/11 a 31/01)
+        top_bankers_inicio = "2025-11-01"
+        top_bankers_fim = "2026-01-31"
+        
         first_date, last_date = sorted_dates[0], sorted_dates[-1]
 
         clientes_primeira = clientes_ultima = 0
         pl_primeira = pl_ultima = 0
-        bankers_captacao = {}
+        bankers_captacao_periodo = {}  # Para métrica "Captação do Período"
+        bankers_captacao_ranking = {}  # Para Top 3 Bankers (período maior)
         cliente_to_banker = {}
 
         for cliente in data:
@@ -586,17 +596,27 @@ def get_metrics():
                 clientes_ultima += 1
                 pl_ultima += float(cliente[last_date])
 
-        # Calcular captação por banker a partir do netinflow
+        # 1. Calcular captação por banker a partir do netinflow (para ambos períodos)
         for flow in netinflow_data:
             cliente_nome = flow.get("net_inflow.client_name", "")
+            flow_date = flow.get("net_inflow.date", "")
             flow_value = flow.get("net_inflow.net_inflow_usd", 0)
             banker = cliente_to_banker.get(cliente_nome)
+            
             if banker and flow_value > 0:
-                if banker not in bankers_captacao:
-                    bankers_captacao[banker] = 0
-                bankers_captacao[banker] += flow_value
+                # Adicionar ao período da métrica (01/12 a 31/01)
+                if periodo_captacao_inicio <= flow_date <= periodo_captacao_fim:
+                    if banker not in bankers_captacao_periodo:
+                        bankers_captacao_periodo[banker] = 0
+                    bankers_captacao_periodo[banker] += flow_value
+                
+                # Adicionar ao período do ranking (01/11 a 31/01)
+                if top_bankers_inicio <= flow_date <= top_bankers_fim:
+                    if banker not in bankers_captacao_ranking:
+                        bankers_captacao_ranking[banker] = 0
+                    bankers_captacao_ranking[banker] += flow_value
 
-        # Incluir clientes novos (primeira data com valor > 0 != 2025-12-01) como captação
+        # 2. Incluir clientes novos como captação (primeira data com valor > 0 != 2025-12-01)
         for cliente in data:
             cliente_nome = cliente.get("Cliente", "")
             banker = cliente_to_banker.get(cliente_nome)
@@ -614,27 +634,39 @@ def get_metrics():
                     primeiro_valor = float(cliente[date])
                     break
 
-            # Se primeira data com valor > 0 não é 2025-12-01, é cliente novo - contar como captação
+            # Se primeira data com valor > 0 não é 2025-12-01, é cliente novo
             if primeiro_valor and primeira_data and primeira_data != "2025-12-01":
-                if banker not in bankers_captacao:
-                    bankers_captacao[banker] = 0
-                bankers_captacao[banker] += primeiro_valor
+                # Adicionar ao período da métrica (01/12 a 31/01)
+                if primeira_data >= periodo_captacao_inicio:
+                    if banker not in bankers_captacao_periodo:
+                        bankers_captacao_periodo[banker] = 0
+                    bankers_captacao_periodo[banker] += primeiro_valor
+                
+                # Adicionar ao período do ranking (01/11 a 31/01)
+                if primeira_data >= top_bankers_inicio:
+                    if banker not in bankers_captacao_ranking:
+                        bankers_captacao_ranking[banker] = 0
+                    bankers_captacao_ranking[banker] += primeiro_valor
 
-        # Se ainda não há dados de captação, usar P&L inicial como proxy
-        if not bankers_captacao:
+        # 3. Se ainda não há dados de captação, usar P&L inicial como proxy
+        if not bankers_captacao_periodo and not bankers_captacao_ranking:
             for cliente in data:
                 cliente_nome = cliente.get("Cliente", "")
                 banker = cliente_to_banker.get(cliente_nome)
                 if first_date in cliente and cliente[first_date] is not None:
                     pl_value = float(cliente[first_date])
                     if pl_value > 0:
-                        if banker not in bankers_captacao:
-                            bankers_captacao[banker] = 0
-                        bankers_captacao[banker] += pl_value
+                        if banker not in bankers_captacao_periodo:
+                            bankers_captacao_periodo[banker] = 0
+                        bankers_captacao_periodo[banker] += pl_value
+                        
+                        if banker not in bankers_captacao_ranking:
+                            bankers_captacao_ranking[banker] = 0
+                        bankers_captacao_ranking[banker] += pl_value
 
-        # Calcular Top 3 Bankers por captação (excluindo Alan Finazzi Sbeghen)
+        # Calcular Top 3 Bankers por captação ranking (excluindo Alan Finazzi Sbeghen)
         bankers_for_top = {
-            k: v for k, v in bankers_captacao.items() if k != "Alan Finazzi Sbeghen"
+            k: v for k, v in bankers_captacao_ranking.items() if k != "Alan Finazzi Sbeghen"
         }
         top3_bankers = sorted(
             bankers_for_top.items(), key=lambda x: x[1], reverse=True
@@ -644,8 +676,8 @@ def get_metrics():
             for nome, captacao in top3_bankers
         ]
 
-        # Captação total do período (mantém contribuições de todos, incluindo Alan)
-        captacao_total = sum(bankers_captacao.values())
+        # Captação total do período (01/12 a 31/01) - mantém contribuições de todos, incluindo Alan
+        captacao_total = sum(bankers_captacao_periodo.values())
 
         return jsonify(
             {
