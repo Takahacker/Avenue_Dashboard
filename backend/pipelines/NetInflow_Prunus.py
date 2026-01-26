@@ -32,27 +32,27 @@ ACCESS_TOKEN = None
 def autenticar_looker() -> str:
     """
     Autentica com a API Looker usando OAuth2 (client_id e client_secret).
-    
+
     Returns:
         Token de acesso para usar nas requisições
     """
     global ACCESS_TOKEN
-    
+
     payload = {
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
     }
-    
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    
+
     try:
         resp = requests.post(
             f"{LOOKER_BASE_URL}{LOGIN_ENDPOINT}",
             data=payload,
             headers=headers,
-            timeout=53
+            timeout=53,
         )
         resp.raise_for_status()
         token = resp.json().get("access_token")
@@ -65,12 +65,9 @@ def autenticar_looker() -> str:
         raise RuntimeError(f"Erro ao autenticar com Looker: {e}")
 
 
-def fetch_net_inflow_looker(filtro: str = "last 53 days") -> List[Dict]:
+def fetch_net_inflow_looker() -> List[Dict]:
     """
-    Faz requisição ao Looker para net_inflow.
-
-    Args:
-        filtro: Filtro de data (padrão: últimos 53 dias)
+    Faz requisição ao Looker para net_inflow desde 01/11/2025.
 
     Returns:
         Lista de registros retornados pela API
@@ -97,9 +94,9 @@ def fetch_net_inflow_looker(filtro: str = "last 53 days") -> List[Dict]:
             "net_inflow.product_type",
             "net_inflow.product_symbol",
             "net_inflow.net_inflow_brl",
-            "net_inflow.net_inflow_usd"
+            "net_inflow.net_inflow_usd",
         ],
-        "filters": {"net_inflow.date": filtro},
+        "filters": {"net_inflow.date": "2025-11-01 TO 2026-01-31"},
     }
 
     headers = {
@@ -110,7 +107,10 @@ def fetch_net_inflow_looker(filtro: str = "last 53 days") -> List[Dict]:
 
     try:
         resp = requests.post(
-            f"{LOOKER_BASE_URL}{QUERY_ENDPOINT}", headers=headers, json=payload, timeout=120
+            f"{LOOKER_BASE_URL}{QUERY_ENDPOINT}",
+            headers=headers,
+            json=payload,
+            timeout=120,
         )
         resp.raise_for_status()
         return resp.json()
@@ -119,7 +119,9 @@ def fetch_net_inflow_looker(filtro: str = "last 53 days") -> List[Dict]:
         return []
 
 
-def processar_net_inflow(dados: List[Dict], clientes_prunus: List[str], mapeamento_banker: Dict[str, str]) -> Dict[str, pd.DataFrame]:
+def processar_net_inflow(
+    dados: List[Dict], clientes_prunus: List[str], mapeamento_banker: Dict[str, str]
+) -> Dict[str, pd.DataFrame]:
     """
     Processa dados de net_inflow e agrupa por cliente Prunus.
 
@@ -212,7 +214,7 @@ def salvar_csv_raw(dados: List[Dict]) -> None:
     df = pd.DataFrame(dados)
     csv_path = os.path.join(dir_csv, "net_inflow_raw.csv")
     df.to_csv(csv_path, index=False, encoding="utf-8")
-    
+
     print(f"✓ CSV raw salvo em: {csv_path} ({len(dados)} registros)")
 
 
@@ -247,7 +249,7 @@ def salvar_json_raw(dados: List[Dict]) -> None:
     json_path = os.path.join(dir_json, "net_inflow_raw.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(dados, f, indent=2, ensure_ascii=False)
-    
+
     print(f"✓ JSON raw salvo em: {json_path} ({len(dados)} registros)")
 
 
@@ -269,9 +271,11 @@ def salvar_excel_abas_por_cliente(dfs_por_cliente: Dict[str, pd.DataFrame]) -> N
                 # Sanitizar nome da aba (máximo 31 caracteres no Excel)
                 aba_nome = cliente[:31]
                 df.to_excel(writer, sheet_name=aba_nome, index=False)
-        
+
         total_registros = sum(len(df) for df in dfs_por_cliente.values())
-        print(f"✓ Excel com {len(dfs_por_cliente)} abas salvo em: {excel_path} ({total_registros} registros)")
+        print(
+            f"✓ Excel com {len(dfs_por_cliente)} abas salvo em: {excel_path} ({total_registros} registros)"
+        )
     except ImportError:
         print("⚠ openpyxl não instalado. Pulando arquivo Excel.")
     except Exception as e:
@@ -305,8 +309,8 @@ def main():
     mapeamento_banker = carregar_mapeamento_banker("banker_list.txt")
 
     # Buscar dados de net_inflow
-    print("\n4. Puxando dados de Net Inflow dos últimos 53 dias...")
-    dados = fetch_net_inflow_looker("last 53 days")
+    print("\n4. Puxando dados de Net Inflow desde 01/11/2025...")
+    dados = fetch_net_inflow_looker()
 
     if not dados:
         print("⚠ Nenhum dado de net_inflow foi retornado!")
