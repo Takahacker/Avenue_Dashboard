@@ -213,4 +213,5 @@ def get_clients_pl():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     debug = os.getenv("FLASK_ENV", "development") == "development"
+    print(f"Starting Flask app on port {port}")
     app.run(debug=debug, port=port, host="0.0.0.0")
