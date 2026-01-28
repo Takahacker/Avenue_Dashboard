@@ -12,7 +12,7 @@ with open("backend/data/PL/json/evolucao_pl_diaria.json", "r") as f:
 
 # Gerar todas as datas de 01/11/2025 a 25/01/2026
 start_date = datetime.strptime("2025-11-01", "%Y-%m-%d")
-end_date = datetime.strptime("2026-01-25", "%Y-%m-%d")
+end_date = datetime.strptime("2026-01-27", "%Y-%m-%d")
 dates = []
 current = start_date
 while current <= end_date:
@@ -40,6 +40,10 @@ for date in dates:
     elif date == "2026-01-24":
         mario[date] = 195930.77
     elif date == "2026-01-25":
+        mario[date] = 195930.77
+    elif date == "2026-01-26":
+        mario[date] = 195930.77
+    elif date == "2026-01-27":
         mario[date] = 195930.77
     else:
         mario[date] = None
