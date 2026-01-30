@@ -430,7 +430,11 @@ def get_bankers_captacao():
             for date in sorted(all_dates_banker):
                 if date in bankers_captacao[banker]:
                     accumulated += bankers_captacao[banker][date]
-                evolution_list.append({"date": date, "value": round(accumulated, 2)})
+                # Apenas adiciona datas a partir de 01/12
+                if date >= "2025-12-01":
+                    evolution_list.append(
+                        {"date": date, "value": round(accumulated, 2)}
+                    )
 
             bankers_evolution.append(
                 {
