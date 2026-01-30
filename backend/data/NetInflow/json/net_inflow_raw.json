@@ -5542,5 +5542,26 @@
     "net_inflow.product_symbol": null,
     "net_inflow.net_inflow_brl": 90000,
     "net_inflow.net_inflow_usd": 16696.97
+  },
+  {
+    "net_inflow.date": "2025-11-21",
+    "net_inflow.created_date": "2025-11-21",
+    "net_inflow.settlement_date": "2025-11-21",
+    "net_inflow.client_cpf": "",
+    "net_inflow.client_email": "",
+    "net_inflow.client_name": "Jiga Blumen",
+    "net_inflow.foreign_finder_email": "axel@levantecorp.com.br",
+    "net_inflow.foreign_finder_code": "AXL000001",
+    "net_inflow.foreign_finder_name": "Axel Farias",
+    "net_inflow.office_cnpj": "39764365000128",
+    "net_inflow.office_name": "LEVANTE ASSET",
+    "net_inflow.kind": "C",
+    "net_inflow.description": "Captação inicial",
+    "net_inflow.product_cusip": null,
+    "net_inflow.product_name": null,
+    "net_inflow.product_type": null,
+    "net_inflow.product_symbol": null,
+    "net_inflow.net_inflow_brl": 50000,
+    "net_inflow.net_inflow_usd": 9270.51
   }
 ]
