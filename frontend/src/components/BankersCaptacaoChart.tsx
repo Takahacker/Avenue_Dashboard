@@ -76,9 +76,17 @@ const BankersCaptacaoChart = ({ bankerOrder }: BankersEvolutionChartProps) => {
 
           // Agrupa dados por data
           const chartData: BankerCaptacaoData[] = [];
+          const cutoffDate = new Date('2025-11-01');
+          
           if (result.data.length > 0 && result.data[0].evolution) {
             const firstBanker = result.data[0];
             firstBanker.evolution.forEach((item: EvolutionPoint, index: number) => {
+              // Filtra apenas datas a partir de 01/11/2025
+              const itemDate = new Date(item.date + 'T00:00:00');
+              if (itemDate < cutoffDate) {
+                return;
+              }
+              
               const datePoint: BankerCaptacaoData = { date: item.date };
               
               result.data.forEach((banker: BankerCaptacaoApiData) => {

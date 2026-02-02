@@ -318,6 +318,10 @@ def get_metrics():
                     if not banker:
                         continue
 
+                    # Exclui dados de Alan da métrica de captação
+                    if banker.lower() == "alan":
+                        continue
+
                     # Só conta valores positivos de Net Inflow
                     if flow_value > 0:
                         if flow_date not in captacao_by_date:
@@ -333,6 +337,10 @@ def get_metrics():
             for cliente in data:
                 cliente_nome = cliente.get("Cliente", "")
                 banker = cliente.get("Banker", "Sem Banker")
+
+                # Exclui Alan da métrica de captação
+                if banker.lower() == "alan":
+                    continue
 
                 # Encontra primeiro PL deste cliente
                 for date in sorted_dates:
@@ -351,10 +359,10 @@ def get_metrics():
                             bankers_captacao[banker] += primeiro_pl
                         break
 
-            # Calcula captação total acumulada
+            # Calcula captação total acumulada (excluindo Alan)
             captacao_total = sum(captacao_by_date.values())
 
-            # Top 3 bankers com maior captação
+            # Top 3 bankers com maior captação (excluindo Alan)
             top_3 = sorted(bankers_captacao.items(), key=lambda x: x[1], reverse=True)[
                 :3
             ]
