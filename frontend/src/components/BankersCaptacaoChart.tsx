@@ -157,7 +157,7 @@ const BankersCaptacaoChart = ({ bankerOrder }: BankersEvolutionChartProps) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-serif text-gold-gradient">Captação por Banker</h3>
-          <p className="text-xs text-muted-foreground mt-1">Inflows positivos + PL inicial de novos clientes - Período de 01/12/2025 a 20/01/2026</p>
+          <p className="text-xs text-muted-foreground mt-1">Inflows positivos + PL inicial de novos clientes - Período de 01/11/2025 a 20/01/2026</p>
         </div>
         
         {/* Filtro de Bankers */}
