@@ -648,7 +648,8 @@ def get_bankers_captacao():
                     bankers_captacao[banker][date] = 0
                 bankers_captacao[banker][date] += value
 
-        # Adiciona primeiro PL de TODOS os clientes (como captação inicial)
+        # Adiciona primeiro PL de novos clientes
+        # Clientes novos = aqueles cuja primeira data é != 2025-12-01
         for cliente in pl_data:
             cliente_nome = cliente.get("Cliente", "")
             banker = cliente.get("Banker", "Sem Banker")
@@ -662,8 +663,13 @@ def get_bankers_captacao():
                     first_pl_value = float(cliente[date])
                     break
 
-            # Inclui TODOS os clientes como captação em sua primeira data
-            if first_pl_date and first_pl_date >= "2025-11-01":
+            # Clientes novos: primeira data != 2025-12-01
+            # Isso inclui clientes com primeira data em 01/11, 13/11, 01/12 (após 01/12), etc
+            if (
+                first_pl_date
+                and first_pl_date != "2025-12-01"
+                and first_pl_date >= "2025-11-01"
+            ):
                 if banker not in bankers_captacao:
                     bankers_captacao[banker] = {}
                 if first_pl_date not in bankers_captacao[banker]:
@@ -795,8 +801,8 @@ def get_captacao_evolucao():
                     break
 
         for cliente_nome, (first_date, first_value) in cliente_pl_inicial.items():
-            # Inclui clientes cuja primeira data é >= 01/11/2025
-            if first_date >= "2025-11-01":
+            # Inclui clientes novos (primeira data != 2025-12-01) que começam a partir de 01/11
+            if first_date != "2025-12-01" and first_date >= "2025-11-01":
                 if first_date not in captacao_by_date:
                     captacao_by_date[first_date] = 0
                 captacao_by_date[first_date] += first_value
