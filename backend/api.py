@@ -672,6 +672,7 @@ def get_bankers_captacao():
 
         # Converte para formato de resposta com evolução acumulada
         bankers_evolution = []
+        cutoff_date = "2025-11-01"
 
         for banker in sorted(bankers_captacao.keys()):
             # Exclui banker Alan da métrica de captação
@@ -688,6 +689,10 @@ def get_bankers_captacao():
             sorted_dates_for_banker = sorted(all_dates_for_banker)
 
             for date in sorted_dates_for_banker:
+                # Filtra apenas datas a partir de 01/11/2025
+                if date < cutoff_date:
+                    continue
+
                 if date in bankers_captacao[banker]:
                     accumulated += bankers_captacao[banker][date]
                 evolution_list.append({"date": date, "value": round(accumulated, 2)})
