@@ -682,7 +682,7 @@ def get_bankers_captacao():
 
         for banker in sorted(bankers_captacao.keys()):
             # Exclui banker Alan da métrica de captação
-            if banker.lower() == "alan":
+            if "alan" in banker.lower():
                 continue
             evolution_list = []
             accumulated = 0
