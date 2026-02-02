@@ -415,7 +415,12 @@ def get_bankers_captacao():
                     first_pl_value = float(cliente[date])
                     break
 
-            if first_pl_date and first_pl_date != "2025-12-01":
+            # Clientes novos: primeira data != 2025-12-01 e >= 2025-11-01
+            if (
+                first_pl_date
+                and first_pl_date != "2025-12-01"
+                and first_pl_date >= "2025-11-01"
+            ):
                 if banker not in bankers_captacao:
                     bankers_captacao[banker] = {}
                 if first_pl_date not in bankers_captacao[banker]:
@@ -423,18 +428,34 @@ def get_bankers_captacao():
                 bankers_captacao[banker][first_pl_date] += first_pl_value
 
         bankers_evolution = []
-        for banker in sorted(bankers_captacao.keys()):
+        cutoff_date = "2025-11-01"
+
+        # Cria mapa de todos os bankers (inclui aqueles sem dados)
+        all_bankers_set = set()
+        for cliente in pl_data:
+            banker = cliente.get("Banker", "Sem Banker")
+            all_bankers_set.add(banker)
+
+        for banker in sorted(all_bankers_set):
             evolution_list = []
             accumulated = 0
-            all_dates_banker = set(sorted_dates) | set(bankers_captacao[banker].keys())
+
+            # Combina todas as datas
+            all_dates_banker = set(sorted_dates)
+            if banker in bankers_captacao:
+                all_dates_banker.update(bankers_captacao[banker].keys())
+
+            # Garante que começa a partir de 01/11/2025
+            all_dates_banker.add(cutoff_date)
+
             for date in sorted(all_dates_banker):
-                if date in bankers_captacao[banker]:
+                # Filtra apenas datas a partir de 01/11/2025
+                if date < cutoff_date:
+                    continue
+
+                if banker in bankers_captacao and date in bankers_captacao[banker]:
                     accumulated += bankers_captacao[banker][date]
-                # Apenas adiciona datas a partir de 01/12
-                if date >= "2025-12-01":
-                    evolution_list.append(
-                        {"date": date, "value": round(accumulated, 2)}
-                    )
+                evolution_list.append({"date": date, "value": round(accumulated, 2)})
 
             bankers_evolution.append(
                 {
