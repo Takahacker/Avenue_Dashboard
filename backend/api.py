@@ -680,7 +680,13 @@ def get_bankers_captacao():
         bankers_evolution = []
         cutoff_date = "2025-11-01"
 
-        for banker in sorted(bankers_captacao.keys()):
+        # Cria mapa de todos os bankers (inclui aqueles sem dados)
+        all_bankers_set = set()
+        for cliente in pl_data:
+            banker = cliente.get("Banker", "Sem Banker")
+            all_bankers_set.add(banker)
+
+        for banker in sorted(all_bankers_set):
             evolution_list = []
             accumulated = 0
 
@@ -700,11 +706,11 @@ def get_bankers_captacao():
                     continue
 
                 # Adiciona o valor para essa data se houver, senão mantém acumulado
-                if date in bankers_captacao[banker]:
+                if banker in bankers_captacao and date in bankers_captacao[banker]:
                     accumulated += bankers_captacao[banker][date]
                 evolution_list.append({"date": date, "value": round(accumulated, 2)})
 
-            # Inclui todos os bankers que têm dados >= 01/11/2025
+            # Inclui todos os bankers (mesmo que não tenham dados)
             if evolution_list:
                 bankers_evolution.append(
                     {
