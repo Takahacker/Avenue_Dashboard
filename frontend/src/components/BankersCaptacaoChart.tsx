@@ -76,26 +76,17 @@ const BankersCaptacaoChart = ({ bankerOrder }: BankersEvolutionChartProps) => {
 
           // Agrupa dados por data
           const chartData: BankerCaptacaoData[] = [];
-          const cutoffDate = new Date('2025-11-01');
+          const cutoffDate = '2025-11-01';
           
           if (result.data.length > 0) {
-            // Encontra a primeira data com dados >= 01/11/2025
-            const allEvolutions: EvolutionPoint[] = [];
-            result.data.forEach((banker: BankerCaptacaoApiData) => {
-              if (banker.evolution) {
-                allEvolutions.push(...banker.evolution);
-              }
-            });
-            
             // Agrupa por data de todos os bankers
             const dateMap: Map<string, BankerCaptacaoData> = new Map();
             
             result.data.forEach((banker: BankerCaptacaoApiData) => {
               if (banker.evolution) {
                 banker.evolution.forEach((item: EvolutionPoint) => {
-                  const itemDate = new Date(item.date + 'T00:00:00');
-                  // Filtra apenas datas a partir de 01/11/2025
-                  if (itemDate < cutoffDate) {
+                  // Filtra apenas datas a partir de 01/11/2025 (comparação de string)
+                  if (item.date < cutoffDate) {
                     return;
                   }
                   
