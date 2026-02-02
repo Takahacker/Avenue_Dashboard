@@ -648,9 +648,7 @@ def get_bankers_captacao():
                     bankers_captacao[banker][date] = 0
                 bankers_captacao[banker][date] += value
 
-        # Adiciona primeiro PL de novos clientes
-        # Clientes novos = aqueles cuja primeira data é >= 01/11/2025 e != 01/12/2025
-        # Também inclui clientes cuja primeira data é 01/11/2025 (clientes iniciais com dados desde novembro)
+        # Adiciona primeiro PL de TODOS os clientes (como captação inicial)
         for cliente in pl_data:
             cliente_nome = cliente.get("Cliente", "")
             banker = cliente.get("Banker", "Sem Banker")
@@ -664,8 +662,7 @@ def get_bankers_captacao():
                     first_pl_value = float(cliente[date])
                     break
 
-            # Inclui clientes cuja primeira data é >= 01/11/2025 como captação inicial
-            # (seja cliente novo após 01/12 ou cliente inicial em 01/11)
+            # Inclui TODOS os clientes como captação em sua primeira data
             if first_pl_date and first_pl_date >= "2025-11-01":
                 if banker not in bankers_captacao:
                     bankers_captacao[banker] = {}
@@ -681,7 +678,7 @@ def get_bankers_captacao():
             evolution_list = []
             accumulated = 0
 
-            # Combina todas as datas: PL + Net Inflow
+            # Combina todas as datas: PL + Net Inflow + cutoff_date
             all_dates_for_banker = set(sorted_dates)
             if banker in netinflow_by_banker:
                 all_dates_for_banker.update(netinflow_by_banker[banker].keys())
@@ -696,11 +693,12 @@ def get_bankers_captacao():
                 if date < cutoff_date:
                     continue
 
+                # Adiciona o valor para essa data se houver, senão mantém acumulado
                 if date in bankers_captacao[banker]:
                     accumulated += bankers_captacao[banker][date]
                 evolution_list.append({"date": date, "value": round(accumulated, 2)})
 
-            # Só inclui bankers que têm dados a partir de 01/11
+            # Inclui todos os bankers que têm dados >= 01/11/2025
             if evolution_list:
                 bankers_evolution.append(
                     {
