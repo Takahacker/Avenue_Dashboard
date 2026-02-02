@@ -319,7 +319,7 @@ def get_metrics():
                         continue
 
                     # Exclui dados de Alan da métrica de captação
-                    if banker.lower() == "alan":
+                    if "alan" in banker.lower():
                         continue
 
                     # Só conta valores positivos de Net Inflow
@@ -339,7 +339,7 @@ def get_metrics():
                 banker = cliente.get("Banker", "Sem Banker")
 
                 # Exclui Alan da métrica de captação
-                if banker.lower() == "alan":
+                if "alan" in banker.lower():
                     continue
 
                 # Encontra primeiro PL deste cliente
@@ -650,6 +650,7 @@ def get_bankers_captacao():
 
         # Adiciona primeiro PL de novos clientes
         # Clientes novos = aqueles cuja primeira data é >= 01/11/2025 e != 01/12/2025
+        # Também inclui clientes cuja primeira data é 01/11/2025 (clientes iniciais com dados desde novembro)
         for cliente in pl_data:
             cliente_nome = cliente.get("Cliente", "")
             banker = cliente.get("Banker", "Sem Banker")
@@ -663,13 +664,9 @@ def get_bankers_captacao():
                     first_pl_value = float(cliente[date])
                     break
 
-            # Clientes novos: primeira data >= 01/11/2025 (exceto 01/12/2025 que são clientes iniciais)
-            # Isso inclui clientes com primeira data entre 01/11 e 30/11, e após 01/12
-            if (
-                first_pl_date
-                and first_pl_date >= "2025-11-01"
-                and first_pl_date != "2025-12-01"
-            ):
+            # Inclui clientes cuja primeira data é >= 01/11/2025 como captação inicial
+            # (seja cliente novo após 01/12 ou cliente inicial em 01/11)
+            if first_pl_date and first_pl_date >= "2025-11-01":
                 if banker not in bankers_captacao:
                     bankers_captacao[banker] = {}
                 if first_pl_date not in bankers_captacao[banker]:
@@ -681,9 +678,6 @@ def get_bankers_captacao():
         cutoff_date = "2025-11-01"
 
         for banker in sorted(bankers_captacao.keys()):
-            # Exclui banker Alan da métrica de captação
-            if "alan" in banker.lower():
-                continue
             evolution_list = []
             accumulated = 0
 
@@ -803,8 +797,8 @@ def get_captacao_evolucao():
                     break
 
         for cliente_nome, (first_date, first_value) in cliente_pl_inicial.items():
-            # Se a data inicial não é 2025-12-01, é novo cliente
-            if first_date != "2025-12-01":
+            # Inclui clientes cuja primeira data é >= 01/11/2025
+            if first_date >= "2025-11-01":
                 if first_date not in captacao_by_date:
                     captacao_by_date[first_date] = 0
                 captacao_by_date[first_date] += first_value
