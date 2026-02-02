@@ -649,6 +649,7 @@ def get_bankers_captacao():
                 bankers_captacao[banker][date] += value
 
         # Adiciona primeiro PL de novos clientes
+        # Clientes novos = aqueles cuja primeira data é >= 01/11/2025 e != 01/12/2025
         for cliente in pl_data:
             cliente_nome = cliente.get("Cliente", "")
             banker = cliente.get("Banker", "Sem Banker")
@@ -662,8 +663,13 @@ def get_bankers_captacao():
                     first_pl_value = float(cliente[date])
                     break
 
-            # Se a data inicial não é 2025-12-01, é novo cliente
-            if first_pl_date and first_pl_date != "2025-12-01":
+            # Clientes novos: primeira data >= 01/11/2025 (exceto 01/12/2025 que são clientes iniciais)
+            # Isso inclui clientes com primeira data entre 01/11 e 30/11, e após 01/12
+            if (
+                first_pl_date
+                and first_pl_date >= "2025-11-01"
+                and first_pl_date != "2025-12-01"
+            ):
                 if banker not in bankers_captacao:
                     bankers_captacao[banker] = {}
                 if first_pl_date not in bankers_captacao[banker]:
@@ -686,6 +692,9 @@ def get_bankers_captacao():
             if banker in netinflow_by_banker:
                 all_dates_for_banker.update(netinflow_by_banker[banker].keys())
 
+            # Garante que começa a partir de 01/11/2025
+            all_dates_for_banker.add(cutoff_date)
+
             sorted_dates_for_banker = sorted(all_dates_for_banker)
 
             for date in sorted_dates_for_banker:
@@ -697,19 +706,21 @@ def get_bankers_captacao():
                     accumulated += bankers_captacao[banker][date]
                 evolution_list.append({"date": date, "value": round(accumulated, 2)})
 
-            bankers_evolution.append(
-                {
-                    "nome": banker,
-                    "evolution": evolution_list,
-                    "captacao_total": round(accumulated, 2),
-                    "captacao_inicial": round(evolution_list[0]["value"], 2)
-                    if evolution_list
-                    else 0,
-                    "captacao_final": round(evolution_list[-1]["value"], 2)
-                    if evolution_list
-                    else 0,
-                }
-            )
+            # Só inclui bankers que têm dados a partir de 01/11
+            if evolution_list:
+                bankers_evolution.append(
+                    {
+                        "nome": banker,
+                        "evolution": evolution_list,
+                        "captacao_total": round(accumulated, 2),
+                        "captacao_inicial": round(evolution_list[0]["value"], 2)
+                        if evolution_list
+                        else 0,
+                        "captacao_final": round(evolution_list[-1]["value"], 2)
+                        if evolution_list
+                        else 0,
+                    }
+                )
 
         return jsonify(
             {
